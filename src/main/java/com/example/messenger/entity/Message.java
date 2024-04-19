@@ -27,7 +27,7 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID")
-    private Integer id;
+    private Long id;
     /**
      * Текст сообщения
      */
@@ -54,10 +54,10 @@ public class Message {
      * Отправитель
      */
     @Schema(description = "Отправитель")
-    private Integer sender;
+    private Long sender;
     /**
      * Чат
      */
     @Schema(description = "Чат")
-    private Integer chat;
+    private Long chat;
 }

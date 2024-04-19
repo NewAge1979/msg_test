@@ -12,5 +12,5 @@ public class ChatCreate {
      * Создатель
      */
     @Schema(description = "Создатель")
-    private Integer creator;
+    private Long creator;
 }

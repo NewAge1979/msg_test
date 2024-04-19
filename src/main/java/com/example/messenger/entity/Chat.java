@@ -23,7 +23,7 @@ public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID")
-    private Integer id;
+    private Long id;
     /**
      * Заголовок
      */
@@ -49,5 +49,5 @@ public class Chat {
      */
     @ElementCollection
     @Schema(description = "Участники")
-    private Set<Integer> users;
+    private Set<Long> users;
 }
