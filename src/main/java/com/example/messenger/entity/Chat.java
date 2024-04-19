@@ -8,13 +8,15 @@ import java.util.Set;
  * ChatList-сущность чат
  * <br><i>содержит поля:</i>
  * <br>- id <i>(id чата)</i>;
+ * <br>- title <i>(заголовок)</i>;
+ * <br>- description <i>(описание)</i>;
  * <br>- created <i>(время и дата создания чата)</i>;
  * <br>- creator <i>(создатель)</i>;
- * <br>- participants <i>(участники)</i>;
+ * <br>- users <i>(участники)</i>;
  */
 @Entity
 @Data
-public class ChatList {
+public class Chat {
     /**
      * ID чата
      */
@@ -22,6 +24,16 @@ public class ChatList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID")
     private Integer id;
+    /**
+     * Заголовок
+     */
+    @Schema(description = "Заголовок")
+    private String title;
+    /**
+     * Описание
+     */
+    @Schema(description = "Описание")
+    private String description;
     /**
      * Время и дата создания чата
      */
@@ -37,5 +49,5 @@ public class ChatList {
      */
     @ElementCollection
     @Schema(description = "Участники")
-    private Set<Integer> participants;
+    private Set<Integer> users;
 }

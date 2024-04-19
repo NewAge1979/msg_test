@@ -2,6 +2,8 @@ package com.example.messenger.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.NonNull;
+
 /**
  *UserUpdate обновление данных пользователя
  * <br><i>содержит поля:</i>
@@ -17,18 +19,21 @@ public class UserUpdate {
      */
     @Size(min = 1,max = 100)
     @Schema(description = "Имя пользователя")
+    @NonNull
     private String firstName;
     /**
      * Фамилия пользователя
      */
     @Size(min = 1,max = 100)
     @Schema(description = "Фамилия пользователя")
+    @NonNull
     private String lastName;
     /**
      * Прозвище пользователя
      */
     @Size(min = 1,max = 100)
     @Schema(description = "Прозвище пользователя")
+    @NonNull
     private String nickname;
     /**
      * Информация о себе

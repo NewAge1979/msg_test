@@ -1,13 +1,12 @@
 package com.example.messenger.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
+
 /**
  * Message - сущность сообщение
  * <br><i>содержит поля:</i>
@@ -39,7 +38,8 @@ public class Message {
      * Вложение
      */
     @Schema(description = "Attachment")
-    private URI attachment;
+    @ElementCollection
+    private List<URI> attachment;
     /**
      * Дата и время создания сообщения
      */
@@ -59,5 +59,5 @@ public class Message {
      * Чат
      */
     @Schema(description = "Чат")
-    private String chat;
+    private Integer chat;
 }
