@@ -1,4 +1,4 @@
-package com.example.messenger.repsitory;
+package ru.salfa.messenger.repsitory;
 
 import com.example.messenger.entity.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;

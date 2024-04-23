@@ -1,4 +1,4 @@
-package com.example.messenger.dto;
+package ru.salfa.messenger.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 /**

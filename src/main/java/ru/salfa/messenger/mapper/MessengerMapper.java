@@ -1,4 +1,4 @@
-package com.example.messenger.mapper;
+package ru.salfa.messenger.mapper;
 
 public interface MessengerMapper {
 }

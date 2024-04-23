@@ -1,4 +1,4 @@
-package com.example.messenger.service;
+package ru.salfa.messenger.service;
 
 /**
  * Сервис сообщений
