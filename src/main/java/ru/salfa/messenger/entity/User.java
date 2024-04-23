@@ -1,4 +1,4 @@
-package com.example.messenger.entity;
+package ru.salfa.messenger.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

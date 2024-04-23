@@ -1,4 +1,4 @@
-package com.example.messenger;
+package ru.salfa.messenger;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
