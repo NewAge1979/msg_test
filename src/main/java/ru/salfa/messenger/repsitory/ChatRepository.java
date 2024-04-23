@@ -1,6 +1,6 @@
 package ru.salfa.messenger.repsitory;
 
-import com.example.messenger.entity.Chat;
+import ru.salfa.messenger.entity.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
