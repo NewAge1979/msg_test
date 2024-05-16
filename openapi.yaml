@@ -8,7 +8,7 @@ security:
   - Basic: []
 
 paths:
-  /register/code_verification:
+  /signup/code_verification:
     post:
       tags:
         - Registration
@@ -25,7 +25,7 @@ paths:
           description: Bad Request
         default: # Обработка непредвиденных ошибок сервера
           description: Internal Server Error # Внутренняя ошибка сервера
-  /register:
+  /signup:
     post:
       tags:
         - Registration
@@ -44,7 +44,7 @@ paths:
           description: Bad Request
         default: # Обработка непредвиденных ошибок сервера
           description: Internal Server Error # Внутренняя ошибка сервера
-  /register/send_message_to_support:
+  /signup/send_message_to_support:
     post:
       tags:
         - Registration
@@ -56,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendMassageToSuport'
+                $ref: '#/components/schemas/SendMessageToSuport'
         '401':
           description: Unauthorized #пользователь не авторизован
         '400':
@@ -88,26 +88,26 @@ components:
           type: string
           maxLength: 64
           pattern: '^[a-zA-Zа-яА-Я\s]*$'
-          description: 'имя пользователя, без цифр'
+          description: 'Имя пользователя, без цифр'
         lastName:
           type: string
           maxLength: 64
-          pattern: '^[a-zA-Zа-яА-Я\s]*$'
-          description: 'фамилия пользователя, без цифр'
+          #pattern: '^[a-zA-Zа-яА-Я\s]*$'
+          description: 'Фамилия пользователя, без цифр'
           nullable: true
         nickname:
           type: string
           maxLength: 32
           minLength: 5
-          pattern: '^(?!\s+$).*'
-          description: 'никнейм пользователя, не может быть пустой строкой или состоять только из пробелов'
+          #pattern: '^(?!\s+$).*'
+          description: 'Никнейм пользователя, не может быть пустой строкой или состоять только из пробелов'
         about:
           type: string
-          description: 'персональная информация пользователя'
+          description: 'Персональная информация пользователя'
           maxLength: 148
           nullable: true
 
-    SendMassageToSuport:
+    SendMessageToSuport:
       required:
         - phone
         - email
@@ -117,14 +117,14 @@ components:
         phone:
           type: string
           pattern: '^\d{10}$'
-          description: 'телефон пользователя'
+          description: 'Телефон пользователя'
         email:
           type: string
-          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-          description: 'почта пользователя. Валидный email, допустимые символы в локальной части - буквы, цифры, точки, подчеркивания, дефисы и знаки плюса. Обязательно присутствие символа @, затем нескольких символов, далее обязательной точки и снова символов.'
+          #pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+          description: 'Почта пользователя. Валидный email, допустимые символы в локальной части - буквы, цифры, точки, подчеркивания, дефисы и знаки плюса. Обязательно присутствие символа @, затем нескольких символов, далее обязательной точки и снова символов.'
         text:
           type: string
-          description: 'текст обращения'
+          description: 'Текст обращения'
           maxLength: 500
           minLength: 3
 
@@ -137,9 +137,8 @@ components:
         phone:
           type: string
           pattern: '^\d{10}$'
-          description: 'телефон пользователя'
+          description: 'Телефон пользователя'
         code:
           type: string
           pattern: '^\d{5}$'
-          description: 'код-пароль с телефона, 5 цифр' #уточнить как будем получать
-
+          description: 'Код-пароль с телефона, 5 цифр' #уточнить
