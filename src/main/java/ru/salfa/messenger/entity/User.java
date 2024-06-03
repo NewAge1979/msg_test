@@ -1,93 +1,114 @@
 package ru.salfa.messenger.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-/**
-* User - сущность
- * <br><i>содержит поля:</i>
- * <br>- id <i>(id пользователя)</i>;
- * <br>- lastLogin <i>(последняя авторизация)</i>;
- * <br>- isSuperuser <i>(является ли пользователь администратором)</i>;
- * <br>- email <i>(почта пользователя)</i>;
- * <br>- isStaff <i>(является ли персоналом)</i>;
- * <br>- isActive <i>(активен ли пользователь)</i>;
- * <br>- dataJoined <i>(дата присоединения)</i>;
- * <br>- phone <i>(телефон пользователя)</i>;
- * <br>- firstName <i>(имя пользователя)</i>;
- * <br>- lastName <i>(фамилия пользователя)</i>;
- * <br>- nickname <i>(никнейм пользователя)</i>;
- * <br>- personalInfo <i>(персональная информация пользователя)</i>;
- * <br>- avatar <i>(аватар пользователя)</i>;
- * <br>- isVerified <i>(верифицирован ли пользователь)</i>;
- * <br>- otpCode <i>(отп код пользователя)</i>;
- */
-@Entity
-@AllArgsConstructor
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.List;
+
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
-@Data
-@Table(name = "users")
-public class User {
-    /**
-     * id пользователя
-     */
+@AllArgsConstructor
+@Entity
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_phone", columnNames = {"phone"}),
+        @UniqueConstraint(name = "uq_nickname", columnNames = {"nickname"})
+})
+public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    /**
-     * последняя авторизация
-     */
-    private String lastLogin;
-    /**
-     * является ли пользователь администратором
-     */
-    private boolean isSuperuser;
-    /**
-     * почта пользователя
-     */
-    private String email;
-    /**
-     * является ли персоналом
-     */
-    private boolean isStaff;
-    /**
-     * активен ли пользователь
-     */
-    private boolean isActive;
-    /**
-     * дата присоединения
-     */
-    private String dateJoined;
-    /**
-     * телефон пользователя
-     */
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
+    @SequenceGenerator(name = "users_id_gen", sequenceName = "users_id_seq", allocationSize = 1)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @Size(max = 16)
+    @NotNull
+    @Column(name = "phone", nullable = false, length = 16)
     private String phone;
-    /**
-     * имя пользователя
-     */
-    private String firstName;
-    /**
-     * фамилия пользователя
-     */
+
+    @Size(max = 512)
+    @Column(name = "password_hash", length = 512)
+    private String passwordHash;
+
+    @Size(max = 64)
+    @Column(name = "last_name", length = 64)
     private String lastName;
-    /**
-     * никнейм пользователя
-     */
+
+    @Size(max = 64)
+    @NotNull
+    @Column(name = "first_name", nullable = false, length = 64)
+    private String firstName;
+
+    @Size(max = 32)
+    @NotNull
+    @Column(name = "nickname", nullable = false, length = 32)
     private String nickname;
-    /**
-     * персональная информация пользователя
-     */
-    private String personalInfo;
-    /**
-     * аватар пользователя
-     */
-    private String avatar;
-    /**
-     * верифицирован ли пользователь
-     */
-    private boolean isVerified;
-    /**
-     * отп код пользователя
-     */
-    private String otpCode;
+
+    @Size(max = 64)
+    @Column(name = "email", length = 64)
+    private String email;
+
+    @NotNull
+    @Column(name = "created", nullable = false)
+    private OffsetDateTime created;
+
+    @Column(name = "modified")
+    private OffsetDateTime modified;
+
+    @Column(name = "last_login")
+    private OffsetDateTime lastLogin;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
+    @Column(name = "phone_is_verified")
+    private Boolean phoneIsVerified;
+
+    @Column(name = "email_is_confirmed")
+    private Boolean emailIsConfirmed;
+
+    @Column(name = "personal_information", length = Integer.MAX_VALUE)
+    private String personalInformation;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return phone;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }
