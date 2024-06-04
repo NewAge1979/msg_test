@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "otp")
 @Data
 public class OtpConfig {
+    private Integer length;
     private Long expiration;
     private Integer numberOfAttempts;
     private Long intervalForBlocking;

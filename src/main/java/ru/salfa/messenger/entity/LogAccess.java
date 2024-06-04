@@ -39,5 +39,4 @@ public class LogAccess {
     @NotNull
     @Column(name = "expired", nullable = false)
     private OffsetDateTime expired;
-
 }
