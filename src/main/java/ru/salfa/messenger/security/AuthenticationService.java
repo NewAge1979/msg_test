@@ -2,23 +2,19 @@ package ru.salfa.messenger.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.salfa.messenger.dto.request.GetOtpCodeRequest;
 import ru.salfa.messenger.dto.request.SignInRequest;
 import ru.salfa.messenger.dto.request.SignUpRequest;
 import ru.salfa.messenger.dto.response.TokensResponse;
-import ru.salfa.messenger.entity.OtpCode;
 import ru.salfa.messenger.entity.User;
 import ru.salfa.messenger.exception.UserAlreadyExistsException;
+import ru.salfa.messenger.exception.UserBlockedException;
 import ru.salfa.messenger.exception.UserNotFoundException;
-import ru.salfa.messenger.repository.OtpCodeRepository;
+import ru.salfa.messenger.exception.UserOtpException;
 import ru.salfa.messenger.repository.UserRepository;
+import ru.salfa.messenger.service.OtpService;
 
-import java.util.List;
 import java.util.Optional;
 
 import static java.time.OffsetDateTime.now;
@@ -28,42 +24,42 @@ import static java.time.OffsetDateTime.now;
 @Slf4j
 public class AuthenticationService {
     private final UserRepository userRepository;
-    private final OtpCodeRepository otpCodeRepository;
-
-    private final UserDetailServiceImpl userDetailService;
-    private final AuthenticationManager authenticationManager;
+    private final OtpService otpService;
 
     public void getOtpCode(GetOtpCodeRequest request) {
         log.debug("Phone: {}, action: {}", request.phone(), request.action());
-        Optional<User> user = checkUser(request);
-        if (user.isPresent()) {
-            String otpCodeValue = RandomStringUtils.randomNumeric(6);
-            log.debug("OTP code: {}", otpCodeValue);
-            Optional<List<OtpCode>> otpCodes = otpCodeRepository.findByUserId(user.get().getId());
-            otpCodes.ifPresent(c -> c.forEach(x -> {
-                x.setIsExpired(true);
-                otpCodeRepository.save(x);
-            }));
-            OtpCode otpCode = OtpCode
-                    .builder()
-                    .otpCode(otpCodeValue)
-                    .user(user.get())
-                    .created(now())
-                    .expires(now().plusMinutes(5L))
-                    .isExpired(false)
-                    .build();
-            otpCodeRepository.save(otpCode);
-            //TODO: Add send OTP code
+        boolean phoneExists = userRepository.existsByPhone(request.phone());
+        if (request.action().equals("signUp")) {
+            if (phoneExists) {
+                throw new UserAlreadyExistsException("User already exists.");
+            } else {
+                userRepository.save(
+                        User.builder()
+                                .phone(request.phone())
+                                .firstName("")
+                                .nickname("NewUser#" + request.phone())
+                                .created(now())
+                                .isDeleted(false)
+                                .phoneIsVerified(false)
+                                .emailIsConfirmed(false)
+                                .build()
+                );
+            }
         } else {
-            throw new UserNotFoundException("User not found.");
+            if (!phoneExists) {
+                throw new UserNotFoundException("User not found.");
+            }
         }
+        otpService.sendOTPCode(userRepository.findByPhone(request.phone()).get());
     }
 
     public TokensResponse signUp(SignUpRequest request) {
         log.debug("{}", request.toString());
-        UserDetails user = userDetailService.loadUserByUsername(request.phone());
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.phone(), request.otp()));
-        return new TokensResponse("111", "222");
+        if (checkUserOtpAndBlock(request)) {
+            return null;
+        }
+        return null;
+
     }
 
     public TokensResponse signIn(SignInRequest request) {
@@ -79,24 +75,20 @@ public class AuthenticationService {
 
     }
 
-    private Optional<User> checkUser(GetOtpCodeRequest request) throws UserAlreadyExistsException {
-        if (request.action().equals("signUp")) {
-            if (userRepository.existsByPhone(request.phone())) {
-                throw new UserAlreadyExistsException("User already exists.");
-            }
-            User newUser = User
-                    .builder()
-                    .phone(request.phone())
-                    .firstName("")
-                    .nickname(request.phone())
-                    .created(now())
-                    .isDeleted(false)
-                    .phoneIsVerified(false)
-                    .emailIsConfirmed(false)
-                    .build();
-            log.debug("{}", newUser.toString());
-            userRepository.save(newUser);
+    private boolean checkUserOtpAndBlock(SignUpRequest request) throws UserNotFoundException, UserBlockedException, UserOtpException {
+        Optional<User> user = userRepository.findByPhone(request.phone());
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User not found.");
         }
-        return userRepository.findByPhone(request.phone());
+        User curUser = user.get();
+        if (otpService.userIsBlockedByOTP(curUser.getId())) {
+            throw new UserBlockedException("User is temporary blocked now.");
+        }
+        if (otpService.checkOTPCode(curUser, request.otp())) {
+            return true;
+        } else {
+            throw new UserOtpException("OTP code is incorrect.");
+        }
+
     }
 }

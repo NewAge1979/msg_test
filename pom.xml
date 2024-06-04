@@ -11,12 +11,17 @@
 	<groupId>ru.salfa</groupId>
 	<artifactId>Messenger</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>messenger</name>
+	<name>Messenger</name>
 	<description>Messenger project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.12.5</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -82,5 +87,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

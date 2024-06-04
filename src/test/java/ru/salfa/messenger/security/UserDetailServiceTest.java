@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class UserDetailServiceImplTest {
+class UserDetailServiceTest {
     @Mock
     UserRepository userRepository;
 
