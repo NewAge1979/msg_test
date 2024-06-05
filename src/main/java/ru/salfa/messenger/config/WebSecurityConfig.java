@@ -1,11 +1,13 @@
 package ru.salfa.messenger.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,8 +19,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import ru.salfa.messenger.repository.UserRepository;
 import ru.salfa.messenger.security.JwtEntryPoint;
 import ru.salfa.messenger.security.JwtFilter;
+import ru.salfa.messenger.security.PhoneAuthenticationDetailsSource;
+import ru.salfa.messenger.security.PhoneOtpAuthenticationProvider;
+import ru.salfa.messenger.service.OtpService;
 
 import java.util.List;
 
@@ -27,8 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final static String[] WHITELIST = {
-            "/api/v1/auth/getOTPcode",
-            "/api/v1/auth/signUp",
+            "/api/v1/auth/getOTPCode",
             "/api/v1/auth/signIn",
             "/swagger-ui/**",
             "/swagger-resource/*",
@@ -38,6 +43,9 @@ public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
     private final JwtEntryPoint jwtEntryPoint;
+    private final PhoneAuthenticationDetailsSource phoneAuthenticationDetailsSource;
+    private final UserRepository userRepository;
+    private final OtpService otpService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -63,16 +71,17 @@ public class WebSecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtEntryPoint))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin(f -> f.authenticationDetailsSource(phoneAuthenticationDetailsSource));
         return http.build();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        return daoAuthenticationProvider;
+        PhoneOtpAuthenticationProvider phoneOtpAuthenticationProvider = new PhoneOtpAuthenticationProvider(userRepository, otpService);
+        phoneOtpAuthenticationProvider.setUserDetailsService(userDetailsService);
+        phoneOtpAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        return phoneOtpAuthenticationProvider;
     }
 
     @Bean

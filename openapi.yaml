@@ -6,7 +6,7 @@ servers:
   - url: http://localhost:8080/api/v1
 
 paths:
-  /auth/getOTPcode:
+  /auth/getOTPCode:
     post:
       tags:
         - Authentication service
@@ -21,31 +21,6 @@ paths:
       responses:
         '200':
           description: Success generate and send OTP code.
-  /auth/signUp:
-    post:
-      tags:
-        - Authentication service
-      description: Sign up method.
-      operationId: signUp
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SignUpRequest'
-      responses:
-        '200':
-          description: Success sign up.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SignUpAndSignInAndRefreshTokensSuccess'
-        '400':
-          description: Bad credentials.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SignUpAndSignInAndRefreshTokensError'
   /auth/signIn:
     post:
       tags:
@@ -64,13 +39,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignUpAndSignInAndRefreshTokensSuccess'
+                $ref: '#/components/schemas/SignInSuccessResponse'
         '400':
           description: Bad credentials.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignUpAndSignInAndRefreshTokensError'
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/refreshTokens:
     post:
       tags:
@@ -89,13 +64,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignUpAndSignInAndRefreshTokensSuccess'
+                $ref: '#/components/schemas/RefreshTokensSuccessResponse'
         '401':
           description: Unauthorized request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignUpAndSignInAndRefreshTokensError'
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/signOut:
     post:
       tags:
@@ -111,6 +86,23 @@ paths:
       responses:
         '200':
           description: Success sign out.
+  /user/updateData:
+    post:
+      tags:
+        - User service
+      description: Update user data.
+      operationId: userDataUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDataUpdateRequest'
+      responses:
+        '200':
+          description: Success updating user data.
+        '403':
+          description: Unauthorized request.
   /support/createTicket:
     post:
       tags:
@@ -135,24 +127,61 @@ components:
       type: object
       required:
         - phone
-        - action
       properties:
         phone:
           type: string
           pattern: '^\d{10}$'
           description: Mobile phone number.
           example: '9999999999'
-        action:
+    SignInRequest:
+      type: object
+      required:
+        - phone
+        - otpCode
+      properties:
+        phone:
           type: string
-          description: 'Action type: "signUp" for registration, "signIn" for authentication.'
-          example: 'signUp'
-    SignUpRequest:
+          pattern: '^\d{10}$'
+          description: Mobile phone number.
+          example: '9999999999'
+        otpCode:
+          type: string
+          minLength: 6
+          maxLength: 6
+          description: OTP code.
+          example: '123456'
+    SignInSuccessResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token for access.
+        refreshToken:
+          type: string
+          description: Token for refresh.
+        isNewUser:
+          type: boolean
+          description: Is new user.
+    RefreshTokensSuccessResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token for access.
+        refreshToken:
+          type: string
+          description: Token for refresh.
+    ErrorResponse:
+      properties:
+        message:
+          type: string
+          description: Error message.
+    UserDataUpdateRequest:
       type: object
       required:
         - phone
         - firstName
         - nickName
-        - otp
       properties:
         phone:
           type: string
@@ -184,43 +213,6 @@ components:
           nullable: true
           description: About me.
           example: ''
-        otp:
-          type: string
-          minLength: 6
-          maxLength: 6
-          description: OTP code.
-          example: '123456'
-    SignInRequest:
-      type: object
-      required:
-        - phone
-        - otp
-      properties:
-        phone:
-          type: string
-          pattern: '^\d{10}$'
-          description: Mobile phone number.
-          example: '9999999999'
-        otp:
-          type: string
-          minLength: 6
-          maxLength: 6
-          description: OTP code.
-          example: '123456'
-    SignUpAndSignInAndRefreshTokensSuccess:
-      type: object
-      properties:
-        accessToken:
-          type: string
-          description: Token for access.
-        refreshToken:
-          type: string
-          description: Token for refresh.
-    SignUpAndSignInAndRefreshTokensError:
-      properties:
-        message:
-          type: string
-          description: Error message.
     CreateTicketRequest:
       type: object
       required:

@@ -35,7 +35,7 @@ public class OtpServiceImpl implements OtpService {
     public void sendOTPCode(User user) {
         log.debug("sendOTPCode: {}", user.toString());
         String otpCode = generateOTPCode(user);
-        smsSender.sendSms(user.getPhone(), otpCode);
+        //smsSender.sendSms(user.getPhone(), otpCode);
         log.debug("Send OTP code: {} on phone: {}", otpCode, user.getPhone());
     }
 

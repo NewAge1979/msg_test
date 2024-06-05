@@ -9,4 +9,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPhone(String phone);
 
     boolean existsByPhone(String phone);
+
+    //Select id From users Where phone = '9999999999' And phone_is_verified = false
 }

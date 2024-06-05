@@ -5,10 +5,10 @@ import jakarta.validation.constraints.Size;
 
 public record SignInRequest(
         @NotNull @Size(min = 10) String phone,
-        @NotNull @Size(min = 6, max = 6) String otp
+        @NotNull String otpCode
 ) {
     @Override
     public String toString() {
-        return "SignInRequest [Phone: " + phone + ", OTP code: " + otp + "]";
+        return "SignInRequest [Phone: " + phone + ", OTP code: " + otpCode + "]";
     }
 }
