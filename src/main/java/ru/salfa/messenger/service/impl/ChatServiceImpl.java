@@ -1,6 +1,5 @@
 package ru.salfa.messenger.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -46,7 +45,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ChatsDto> getListChatDtoByUser(User user) throws JsonProcessingException {
+    public List<ChatsDto> getListChatDtoByUser(User user) {
         return getChatsByParticipantId(user.getId()).stream()
                 .map(chat -> mapChatToChatDto(chat, user))
                 .collect(Collectors.toList());
@@ -62,11 +61,6 @@ public class ChatServiceImpl implements ChatService {
                         msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
                 .map(messageMapper::toMessageDto)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Messages saveMessage(Messages messages) {
-        return messageRepository.save(messages);
     }
 
     @Override

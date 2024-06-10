@@ -19,7 +19,6 @@ public interface ChatService {
     List<ChatsDto> getListChatDtoByUser(User user) throws JsonProcessingException;
     @Transactional(readOnly = true)
     List<MessageDto> searchMessage(Long chatId, String query, Long userId);
-    Messages saveMessage(Messages messages);
     void clearChat(Long chatId, Long userId);
     MessageDto createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
     void deleteMessage(Long messageId, Long userId, boolean isAll);
