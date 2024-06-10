@@ -22,7 +22,7 @@ public class SearchMessagesPayload extends MessageOutUser {
     private String searchQuery;
     @JsonProperty("chat_id")
     private Long chatId;
-    private String token;
+
     @Override
     public String getAction() {
         return ACTION;

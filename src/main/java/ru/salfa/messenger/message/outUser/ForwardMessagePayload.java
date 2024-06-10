@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.AttachmentsDto;
-import ru.salfa.messenger.entity.Messages;
+import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatMessagePayload;
 import ru.salfa.messenger.message.toUser.SuccessForwardedPayload;
@@ -38,7 +38,6 @@ public class ForwardMessagePayload extends MessageOutUser {
     private List<AttachmentsDto> attachmentsForwardedMessage;
     @JsonProperty("original_sender")
     private String originalSender;
-    private String token;
 
     @Override
     public String getAction() {
@@ -58,12 +57,10 @@ public class ForwardMessagePayload extends MessageOutUser {
         var forwardMessage = service.createAndSaveMsg(chatId, user, forwardedMessage, attachmentsForwardedMessage);
         var msg = service.createAndSaveMsg(chatId, user, message, attachmentsMessage);
 
-        var forwardMessagePayload = creatMsgPayload(user, chatId, forwardMessage);
-        forwardMessagePayload.setText(forwardedMessage);
+        var forwardMessagePayload = creatMsgPayload(chatId, forwardMessage);
         forwardMessagePayload.setOriginalSender(originalSender);
 
-        var messagePayload = creatMsgPayload(user, chatId, msg);
-        messagePayload.setText(message);
+        var messagePayload = creatMsgPayload(chatId, msg);
         messagePayload.setOriginalSender(null);
 
         service.sendMessage(listeners.get(user), successPayload);
@@ -73,12 +70,10 @@ public class ForwardMessagePayload extends MessageOutUser {
         }
     }
 
-    private ChatMessagePayload creatMsgPayload(Long user, Long chatId, Messages forwardMessage) {
+    private ChatMessagePayload creatMsgPayload(Long chatId, MessageDto forwardMessage) {
         var msgPayload = new ChatMessagePayload();
         msgPayload.setChatId(chatId);
-        msgPayload.setId(forwardMessage.getId());
-        msgPayload.setSender(user);
-        msgPayload.setCreated(dateTimeFormatter.format(forwardMessage.getCreated()));
+        msgPayload.setMessage(forwardMessage);
         return msgPayload;
     }
 }

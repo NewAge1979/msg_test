@@ -11,6 +11,7 @@ public class Attachments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    // todo create enum type
     private String type;
     private URL url;
     @ManyToOne

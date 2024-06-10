@@ -20,7 +20,6 @@ public class ClearChatPayload extends MessageOutUser {
 
     @JsonProperty("chat_id")
     private Long chatId;
-    private String token;
 
     @Override
     public String getAction() {

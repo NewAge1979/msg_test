@@ -25,7 +25,6 @@ public class DeleteMessagePayload extends MessageOutUser {
     private Long messageId;
     @JsonProperty("delete_for_everyone")
     private boolean deleteForEveryOne;
-    private String token;
 
     @Override
     public String getAction() {

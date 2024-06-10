@@ -5,9 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -23,7 +21,7 @@ public class Messages {
     @JoinColumn(name = "sender_id")
     private User senderId;
     @ManyToMany
-    private Set<User> userDeleteMessage = new HashSet<>();
+    private List<User> userDeleteMessage = new ArrayList<>();
     private boolean isDelete = false;
     private LocalDateTime created = LocalDateTime.now();
     private LocalDateTime modified;

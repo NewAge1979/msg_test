@@ -21,7 +21,7 @@ public interface ChatService {
     List<MessageDto> searchMessage(Long chatId, String query, Long userId);
     Messages saveMessage(Messages messages);
     void clearChat(Long chatId, Long userId);
-    Messages createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
+    MessageDto createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
     void deleteMessage(Long messageId, Long userId, boolean isAll);
     void sendMessage(WebSocketSession session, MessageToUser message);
     ChatIsCreated getChat(Long participantId, Long userId);

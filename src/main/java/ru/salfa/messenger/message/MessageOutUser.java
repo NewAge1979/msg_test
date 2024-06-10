@@ -33,7 +33,6 @@ public abstract class MessageOutUser {
 
     private String action;
 
-    private String token;
     @JsonIgnore
     public abstract void handler(ChatService service, Map<Long, WebSocketSession> listeners, Long user) ;
 }

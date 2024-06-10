@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageToUser;
 
 @Getter
@@ -18,10 +19,7 @@ public class ChatMessagePayload extends MessageToUser {
 
     @JsonProperty("chat_id")
     private Long chatId;
-    private Long id;
-    private String text;
-    private Long sender;
-    private String created;
+    private MessageDto message;
     @JsonProperty("original_sender")
     private String originalSender;
 

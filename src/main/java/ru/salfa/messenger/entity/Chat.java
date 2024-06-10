@@ -17,7 +17,7 @@ public class Chat {
     private String description;
     @ManyToMany
     private List<User> participants = new ArrayList<>();
-    private LocalDateTime created;
+    private LocalDateTime created = LocalDateTime.now();
     private LocalDateTime modified;
 
     public void addParticipant(User participant) {

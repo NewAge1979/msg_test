@@ -78,7 +78,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public Messages createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) {
+    public MessageDto createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) {
         Chat chat = getChatById(chatId);
         User sender = getUserById(senderId);
         var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
@@ -90,7 +90,8 @@ public class ChatServiceImpl implements ChatService {
         for (var att : attachmentsList) {
             msg.addAttachments(att);
         }
-        return messageRepository.saveAndFlush(msg);
+        messageRepository.saveAndFlush(msg);
+        return messageMapper.toMessageDto(msg);
     }
 
     @Override
@@ -157,8 +158,10 @@ public class ChatServiceImpl implements ChatService {
 
     private ChatsDto mapChatToChatDto(Chat chat, User user) {
         ChatsDto chatDto = chatMapper.toChatDto(chat);
+
         List<MessageDto> messageDtos = messageRepository.findMessagesByChatId(chat).stream()
-                .filter(msg -> !msg.isDelete() && !msg.getUserDeleteMessage().contains(user))
+                .filter(msg -> !msg.isDelete()
+                        && !msg.getUserDeleteMessage().stream().map(User::getId).toList().contains(user.getId()))
                 .map(messageMapper::toMessageDto)
                 .collect(Collectors.toList());
         chatDto.setMessages(messageDtos);
