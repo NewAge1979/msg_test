@@ -33,12 +33,12 @@ public class DeleteMessagePayload extends MessageOutUser {
 
     @Override
     @SneakyThrows
-    public void handler(ChatService service, Map<Long, WebSocketSession> listeners, Long user) {
+    public void handler(ChatService service, Map<String, WebSocketSession> listeners, String phone) {
         var messagePayload = new MessageDeletedPayload();
 
         messagePayload.setChatId(chatId);
         messagePayload.setMessageId(messageId);
-        service.deleteMessage(messageId, user, !deleteForEveryOne);
-        service.sendMessage(listeners.get(user), messagePayload);
+        service.deleteMessage(messageId, phone, !deleteForEveryOne);
+        service.sendMessage(listeners.get(phone), messagePayload);
     }
 }

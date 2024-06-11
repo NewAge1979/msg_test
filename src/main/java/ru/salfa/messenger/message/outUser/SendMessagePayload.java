@@ -10,10 +10,8 @@ import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatMessagePayload;
 import ru.salfa.messenger.service.ChatService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -35,20 +33,21 @@ public class SendMessagePayload extends MessageOutUser {
 
     @SneakyThrows
     @Override
-    public void handler(ChatService service, Map<Long, WebSocketSession> listeners, Long userId) {
-        var chat = service.getChat(participantId, userId).getChat();
+    public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
+
+        var chat = service.getOrCreateChat(participantId, userPhone).getChat();
 
         var messagePayload = new ChatMessagePayload();
 
-        var msgDto = service.createAndSaveMsg(chat.getId(), userId, message, attachments);
+        var msgDto = service.createAndSaveMsg(chat.getId(), userPhone, message, attachments);
         messagePayload.setMessage(msgDto);
         messagePayload.setChatId(chat.getId());
 
-        var participants = chat.getParticipants().stream().map(User::getId)
-                .filter(id -> !id.equals(userId)).collect(Collectors.toCollection(ArrayList::new));
-        for (var id : participants) {
-            if (listeners.containsKey(id)) {
-                service.sendMessage(listeners.get(id), messagePayload);
+        var participantPhoneList = chat.getParticipants().stream().map(User::getPhone)
+                .filter(phone -> !phone.equals(userPhone)).toList();
+        for (var participantPhone : participantPhoneList) {
+            if (listeners.containsKey(participantPhone)) {
+                service.sendMessage(listeners.get(participantPhone), messagePayload);
             }
         }
     }

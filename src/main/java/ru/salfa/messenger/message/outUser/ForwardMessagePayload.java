@@ -46,27 +46,28 @@ public class ForwardMessagePayload extends MessageOutUser {
 
     @Override
     @SneakyThrows
-    public void handler(ChatService service, Map<Long, WebSocketSession> listeners, Long user) {
+    public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
         var successPayload = new SuccessForwardedPayload();
-
-        var chatIsCreated = service.getChat(participantId, user);
+        var chatIsCreated = service.getOrCreateChat(participantId, userPhone);
+        var participantPhone = chatIsCreated.getChat().getParticipants()
+                .stream().filter(p -> p.getId().equals(participantId)).findFirst()
+                .orElseThrow(()-> new RuntimeException("User not found")).getPhone();
         var chatId = chatIsCreated.getChat().getId();
+
         successPayload.setCreated(chatIsCreated.isCreated());
         successPayload.setChatId(chatId);
 
-        var forwardMessage = service.createAndSaveMsg(chatId, user, forwardedMessage, attachmentsForwardedMessage);
-        var msg = service.createAndSaveMsg(chatId, user, message, attachmentsMessage);
+        var forwardMessage = service.createAndSaveMsg(chatId, userPhone, forwardedMessage, attachmentsForwardedMessage);
+        var msg = service.createAndSaveMsg(chatId, userPhone, message, attachmentsMessage);
 
-        var forwardMessagePayload = creatMsgPayload(chatId, forwardMessage);
-        forwardMessagePayload.setOriginalSender(originalSender);
+        var forwardMessagePayload = creatMsgPayload(chatId, forwardMessage, originalSender);
 
         var messagePayload = creatMsgPayload(chatId, msg);
-        messagePayload.setOriginalSender(null);
 
-        service.sendMessage(listeners.get(user), successPayload);
-        if (listeners.containsKey(participantId)) {
-            service.sendMessage(listeners.get(participantId), forwardMessagePayload);
-            service.sendMessage(listeners.get(participantId), messagePayload);
+        service.sendMessage(listeners.get(userPhone), successPayload);
+        if (listeners.containsKey(participantPhone)) {
+            service.sendMessage(listeners.get(participantPhone), forwardMessagePayload);
+            service.sendMessage(listeners.get(participantPhone), messagePayload);
         }
     }
 
@@ -74,6 +75,14 @@ public class ForwardMessagePayload extends MessageOutUser {
         var msgPayload = new ChatMessagePayload();
         msgPayload.setChatId(chatId);
         msgPayload.setMessage(forwardMessage);
+        msgPayload.setOriginalSender(null);
+        return msgPayload;
+    }
+    private ChatMessagePayload creatMsgPayload(Long chatId, MessageDto forwardMessage, String originalSender) {
+        var msgPayload = new ChatMessagePayload();
+        msgPayload.setChatId(chatId);
+        msgPayload.setMessage(forwardMessage);
+        msgPayload.setOriginalSender(originalSender);
         return msgPayload;
     }
 }

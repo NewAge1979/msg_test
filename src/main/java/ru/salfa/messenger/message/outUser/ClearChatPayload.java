@@ -27,12 +27,11 @@ public class ClearChatPayload extends MessageOutUser {
     }
 
     @Override
-    @SneakyThrows
-    public void handler(ChatService service, Map<Long, WebSocketSession> listeners, Long user) {
+    public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
         var messagePayload = new ChatClearedPayload();
         messagePayload.setChatId(chatId);
 
-        service.clearChat(chatId, user);
-        service.sendMessage(listeners.get(user), messagePayload);
+        service.clearChat(chatId, userPhone);
+        service.sendMessage(listeners.get(userPhone), messagePayload);
     }
 }

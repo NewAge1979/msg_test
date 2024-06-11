@@ -8,25 +8,24 @@ import ru.salfa.messenger.dto.model.AttachmentsDto;
 import ru.salfa.messenger.dto.model.ChatIsCreated;
 import ru.salfa.messenger.dto.model.ChatsDto;
 import ru.salfa.messenger.dto.model.MessageDto;
-import ru.salfa.messenger.entity.User;
 import ru.salfa.messenger.message.MessageToUser;
 
 import java.util.List;
 
 public interface ChatService {
     @Transactional(readOnly = true)
-    List<ChatsDto> getListChatDtoByUser(User user) throws JsonProcessingException;
+    List<ChatsDto> getListChatDtoByUserPhone(String phone);
 
     @Transactional(readOnly = true)
-    List<MessageDto> searchMessage(Long chatId, String query, Long userId);
+    List<MessageDto> searchMessage(Long chatId, String query, String userPhone);
 
-    void clearChat(Long chatId, Long userId);
+    void clearChat(Long chatId, String userPhone);
 
-    MessageDto createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
+    MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
 
-    void deleteMessage(Long messageId, Long userId, boolean isAll);
+    void deleteMessage(Long messageId, String userPhone, boolean isAll);
 
     void sendMessage(WebSocketSession session, MessageToUser message);
 
-    ChatIsCreated getChat(Long participantId, Long userId);
+    ChatIsCreated getOrCreateChat(Long participantId, String userPhone);
 }

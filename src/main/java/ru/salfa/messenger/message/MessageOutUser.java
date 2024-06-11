@@ -34,5 +34,5 @@ public abstract class MessageOutUser {
     private String action;
 
     @JsonIgnore
-    public abstract void handler(ChatService service, Map<Long, WebSocketSession> listeners, Long user) ;
+    public abstract void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) ;
 }

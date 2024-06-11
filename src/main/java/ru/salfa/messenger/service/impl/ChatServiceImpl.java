@@ -45,36 +45,45 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ChatsDto> getListChatDtoByUser(User user) {
-        return getChatsByParticipantId(user.getId()).stream()
-                .map(chat -> mapChatToChatDto(chat, user))
+    public List<ChatsDto> getListChatDtoByUserPhone(String phone) {
+        return getChatsByParticipantPhone(phone).stream()
+                .map(chat -> mapChatToChatDto(chat, phone))
                 .collect(Collectors.toList());
-
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<MessageDto> searchMessage(Long chatId, String query, Long userId) {
-        User user = getUserById(userId);
-        return messageRepository.findMessagesByChatId(getChatById(chatId)).stream()
-                .filter(msg -> !msg.isDelete() && !msg.getUserDeleteMessage().contains(user) &&
-                        msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
+    public List<MessageDto> searchMessage(Long chatId, String query, String userPhone) {
+        return messageRepository.findAll().stream()
+                .filter(msg -> msg.getChatId().getId().equals(chatId))
+                .filter(msg -> !msg.isDelete())
+                .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
+                .filter(msg -> msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
                 .map(messageMapper::toMessageDto)
-                .collect(Collectors.toList());
+                .toList();
+
+//        User user = getUserByPhone(userPhone);
+//        return messageRepository.findMessagesByChatId(chatId).stream()
+//                .filter(msg -> !msg.isDelete() && !msg.getUserDeleteMessage().contains(user) &&
+//                        msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
+//                .map(messageMapper::toMessageDto)
+//                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void clearChat(Long chatId, Long userId) {
-        User user = getUserById(userId);
-        messageRepository.findMessagesByChatId(getChatById(chatId)).forEach(msg -> msg.addUserDeleters(user));
+    public void clearChat(Long chatId, String userPhone) {
+        User user = getUserByPhone(userPhone);
+        messageRepository.findAll().stream()
+                .filter(msg -> msg.getChatId().getId().equals(chatId))
+                .forEach(msg -> msg.addUserDeleters(user));
     }
 
     @Override
     @Transactional
-    public MessageDto createAndSaveMsg(Long chatId, Long senderId, String message, List<AttachmentsDto> attachments) {
+    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) {
         Chat chat = getChatById(chatId);
-        User sender = getUserById(senderId);
+        User sender = getUserByPhone(senderPhone);
         var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
         attachmentsRepository.saveAll(attachmentsList);
         Messages msg = new Messages();
@@ -84,18 +93,18 @@ public class ChatServiceImpl implements ChatService {
         for (var att : attachmentsList) {
             msg.addAttachments(att);
         }
-        messageRepository.saveAndFlush(msg);
+        messageRepository.save(msg);
         return messageMapper.toMessageDto(msg);
     }
 
     @Override
     @Transactional
-    public void deleteMessage(Long messageId, Long userId, boolean isAll) {
+    public void deleteMessage(Long messageId, String userPhone, boolean isAll) {
         Messages msg = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
-        User user = getUserById(userId);
+        User user = getUserByPhone(userPhone);
 
-        if (isAll && msg.getSenderId().getId().equals(userId)) {
+        if (isAll && msg.getSenderId().getId().equals(user.getId())) {
             msg.setDelete(true);
         } else {
             msg.addUserDeleters(user);
@@ -110,15 +119,17 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public ChatIsCreated getChat(Long participantId, Long userId) {
+    public ChatIsCreated getOrCreateChat(Long participantId, String userPhone) {
         var chatIsCreated = new ChatIsCreated();
         AtomicBoolean isCreated = new AtomicBoolean(false);
+
         var chats = getChatsByParticipantId(participantId).stream()
-                .filter(chat -> chat.getParticipants().contains(getUserById(userId)))
+                .filter(chat -> chat.getParticipants().stream().map(User::getPhone)
+                        .toList().contains(userPhone))
                 .findFirst()
                 .orElseGet(() -> {
                     isCreated.set(true);
-                    return createChat(userId, participantId);
+                    return createChat(userPhone, participantId);
                 });
         chatIsCreated.setChat(chats);
         chatIsCreated.setCreated(isCreated.get());
@@ -126,20 +137,27 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional(readOnly = true)
-    protected Chat getChatById(Long chatId) {
+    public Chat getChatById(Long chatId) {
         return chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
     }
 
+
     @Transactional(readOnly = true)
-    protected User getUserById(Long userId) {
-        return userRepository.findById(userId)
+    public User getUserByPhone(String phone) {
+        return userRepository.findByPhone(phone)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Transactional
-    protected Chat createChat(Long userId, Long participantId) {
-        User owner = getUserById(userId);
+    public Chat createChat(String userPhone, Long participantId) {
+        User owner = getUserByPhone(userPhone);
         User participant = getUserById(participantId);
 
         Chat chat = new Chat();
@@ -150,12 +168,12 @@ public class ChatServiceImpl implements ChatService {
         return chatRepository.save(chat);
     }
 
-    private ChatsDto mapChatToChatDto(Chat chat, User user) {
+    private ChatsDto mapChatToChatDto(Chat chat, String phone) {
         ChatsDto chatDto = chatMapper.toChatDto(chat);
-
         List<MessageDto> messageDtos = messageRepository.findMessagesByChatId(chat).stream()
                 .filter(msg -> !msg.isDelete()
-                        && !msg.getUserDeleteMessage().stream().map(User::getId).toList().contains(user.getId()))
+                        && !msg.getUserDeleteMessage().stream().map(User::getPhone)
+                        .toList().contains(phone))
                 .map(messageMapper::toMessageDto)
                 .collect(Collectors.toList());
         chatDto.setMessages(messageDtos);
@@ -163,8 +181,20 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional(readOnly = true)
-    protected List<Chat> getChatsByParticipantId(Long participantId) {
-        User participant = getUserById(participantId);
-        return chatRepository.findChatsByParticipantsContaining(participant);
+    public List<Chat> getChatsByParticipantPhone(String phone) {
+        return chatRepository.findAll().stream()
+                .filter(chat -> chat.getParticipants()
+                        .stream().map(User::getPhone)
+                        .toList().contains(phone))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Chat> getChatsByParticipantId(Long id) {
+        return chatRepository.findAll().stream()
+                .filter(chat -> chat.getParticipants()
+                        .stream().map(User::getId)
+                        .toList().contains(id))
+                .toList();
     }
 }
