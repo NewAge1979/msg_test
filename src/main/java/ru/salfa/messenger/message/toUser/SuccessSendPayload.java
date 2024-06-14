@@ -6,25 +6,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageToUser;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonTypeName(ChatMessagePayload.TYPE)
+@JsonTypeName(SuccessSendPayload.TYPE)
 @ToString
-public class ChatMessagePayload extends MessageToUser {
-    public static final String TYPE = "chat_message";
+public class SuccessSendPayload extends MessageToUser {
+    public static final String TYPE = "confirmation";
 
     @JsonProperty("chat_id")
     private Long chatId;
-    private MessageDto messages;
-    @JsonProperty("original_sender")
-    private String originalSender;
+    private String message = "Message forwarded successfully";
+    private boolean created;
 
     @Override
     public String getType() {
         return TYPE;
     }
 }
+

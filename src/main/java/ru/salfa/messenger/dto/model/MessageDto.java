@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class MessageDto {
+    private Long id;
     private String message;
     private Long sender;
     private String created;

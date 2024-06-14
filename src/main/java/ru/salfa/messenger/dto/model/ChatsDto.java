@@ -11,6 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatsDto {
+    @JsonProperty("id")
+    private Long id;
     @JsonProperty("chat_name")
     private String name;
     @JsonProperty("description")

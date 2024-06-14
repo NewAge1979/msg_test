@@ -9,8 +9,9 @@ import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.AttachmentsDto;
 import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageOutUser;
+import ru.salfa.messenger.message.toUser.ChatCreatedPayload;
 import ru.salfa.messenger.message.toUser.ChatMessagePayload;
-import ru.salfa.messenger.message.toUser.SuccessForwardedPayload;
+import ru.salfa.messenger.message.toUser.SuccessSendPayload;
 import ru.salfa.messenger.service.ChatService;
 
 import java.time.format.DateTimeFormatter;
@@ -47,12 +48,28 @@ public class ForwardMessagePayload extends MessageOutUser {
     @Override
     @SneakyThrows
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
-        var successPayload = new SuccessForwardedPayload();
+        var successPayload = new SuccessSendPayload();
         var chatIsCreated = service.getOrCreateChat(participantId, userPhone);
         var participantPhone = chatIsCreated.getChat().getParticipants()
                 .stream().filter(p -> p.getId().equals(participantId)).findFirst()
-                .orElseThrow(()-> new RuntimeException("User not found")).getPhone();
-        var chatId = chatIsCreated.getChat().getId();
+                .orElseThrow(() -> new RuntimeException("User not found")).getPhone();
+        var chat = chatIsCreated.getChat();
+        var chatId = chat.getId();
+
+        if (chatIsCreated.isCreated()) {
+            var creatChatPayload = new ChatCreatedPayload();
+            creatChatPayload.setChatId(chatId);
+            creatChatPayload.setSender(chat.getParticipants().stream()
+                    .filter(user -> user.getPhone().equals(userPhone)).findFirst()
+                    .orElseThrow(()->new RuntimeException("User not found"))
+                    .getId());
+
+            if (listeners.containsKey(participantPhone)) {
+                service.sendMessage(listeners.get(participantPhone), creatChatPayload);
+            }
+
+        }
+
 
         successPayload.setCreated(chatIsCreated.isCreated());
         successPayload.setChatId(chatId);
@@ -74,14 +91,15 @@ public class ForwardMessagePayload extends MessageOutUser {
     private ChatMessagePayload creatMsgPayload(Long chatId, MessageDto forwardMessage) {
         var msgPayload = new ChatMessagePayload();
         msgPayload.setChatId(chatId);
-        msgPayload.setMessage(forwardMessage);
+        msgPayload.setMessages(forwardMessage);
         msgPayload.setOriginalSender(null);
         return msgPayload;
     }
+
     private ChatMessagePayload creatMsgPayload(Long chatId, MessageDto forwardMessage, String originalSender) {
         var msgPayload = new ChatMessagePayload();
         msgPayload.setChatId(chatId);
-        msgPayload.setMessage(forwardMessage);
+        msgPayload.setMessages(forwardMessage);
         msgPayload.setOriginalSender(originalSender);
         return msgPayload;
     }
