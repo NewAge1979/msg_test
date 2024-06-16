@@ -29,10 +29,7 @@ class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     private final String PHONE = "0000000000";
-    private final String ACTION1 = "signUp";
-    private final String ACTION2 = "signIn";
     User user = User.builder().phone(PHONE).firstName("").nickname(PHONE).created(OffsetDateTime.now()).build();
-    GetOtpCodeRequest request1 = new GetOtpCodeRequest(PHONE, ACTION1);
-    GetOtpCodeRequest request2 = new GetOtpCodeRequest(PHONE, ACTION2);
-
+    GetOtpCodeRequest request1 = new GetOtpCodeRequest(PHONE);
+    GetOtpCodeRequest request2 = new GetOtpCodeRequest(PHONE);
 }

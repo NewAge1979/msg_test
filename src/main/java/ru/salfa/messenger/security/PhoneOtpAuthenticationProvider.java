@@ -23,25 +23,24 @@ public class PhoneOtpAuthenticationProvider extends DaoAuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (authentication.getDetails() == null) {
-            log.debug("getDetails is null!!!");
-        }
         User user = userRepository.findByPhone(authentication.getName()).orElseThrow(
                 () -> new UserNotFoundException("User not found.")
         );
         if (otpService.userIsBlockedByOTP(user.getId())) {
             throw new UserBlockedException("User is temporary blocked now.");
         }
-        /*String otpCode = ((PhoneAuthenticationDetails) authentication.getDetails()).getOtpCode();
+        String otpCode = ((PhoneOtpAuthenticationToken) authentication).getOtpCode();
+        log.debug("OTP code: {}", otpCode);
         if (!otpService.checkOTPCode(user, otpCode)) {
             throw new UserOtpException("OTP code is incorrect.");
-        }*/
+        }
+        otpService.clearOTPCode(user, otpCode);
         //return super.authenticate(authentication);
         return new UsernamePasswordAuthenticationToken(user.getUsername(), "", new ArrayList<>());
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(UsernamePasswordAuthenticationToken.class);
+        return authentication.equals(PhoneOtpAuthenticationToken.class);
     }
 }

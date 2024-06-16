@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,8 +20,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-    private final String ACCESS_HEADER = "access-token";
-    private final String REFRESH_HEADER = "refresh-token";
+    //private final String ACCESS_HEADER = "access-token";
+    //private final String REFRESH_HEADER = "refresh-token";
+    private final String AUTHORIZATION = "Authorization";
     private final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
@@ -31,18 +31,18 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain
-    ) throws ServletException, IOException {
-        var accessHeader = request.getHeader(ACCESS_HEADER);
-        if (StringUtils.isNotEmpty(accessHeader) && StringUtils.startsWith(accessHeader, BEARER_PREFIX)) {
-            var phone = jwtService.getPhoneFromAccessToken(accessHeader);
+    ) throws IOException, ServletException {//}, UserTokenException {
+        var authorization = request.getHeader(AUTHORIZATION);
+        log.debug("Authorization: {}", authorization);
+        if (StringUtils.isNotEmpty(authorization) && StringUtils.startsWith(authorization, BEARER_PREFIX)) {
+            var phone = jwtService.getPhoneFromAccessToken(authorization);
             if (StringUtils.isNotEmpty(phone) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailService.loadUserByUsername(phone);
-                if (jwtService.accessTokenIsValid(accessHeader, userDetails)) {
+                if (jwtService.accessTokenIsValid(authorization, userDetails)) {
                     SecurityContext context = SecurityContextHolder.createEmptyContext();
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, "", userDetails.getAuthorities()
                     );
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     context.setAuthentication(authenticationToken);
                     SecurityContextHolder.setContext(context);
                 }

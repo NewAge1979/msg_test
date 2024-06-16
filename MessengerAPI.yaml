@@ -3,10 +3,10 @@ info:
   title: Messenger's API Documentation
   version: '1.0.0'
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:8080
 
 paths:
-  /auth/getOTPCode:
+  /api/v1/auth/getOTPCode:
     post:
       tags:
         - Authentication service
@@ -21,7 +21,7 @@ paths:
       responses:
         '200':
           description: Success generate and send OTP code.
-  /auth/signIn:
+  /api/v1/auth/signIn:
     post:
       tags:
         - Authentication service
@@ -46,7 +46,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /auth/refreshTokens:
+  /api/v1/auth/refreshTokens:
     post:
       tags:
         - Authentication service
@@ -54,10 +54,11 @@ paths:
       operationId: refreshTokens
       parameters:
         - in: header
-          name: refreshToken
+          name: Authorization
           schema:
             type: string
           required: true
+          description: Refresh token
       responses:
         '200':
           description: Success refresh tokens.
@@ -71,7 +72,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /auth/signOut:
+  /api/v1/auth/signOut:
     post:
       tags:
         - Authentication service
@@ -79,31 +80,65 @@ paths:
       operationId: signOut
       parameters:
         - in: header
-          name: accessToken
+          name: Authorization
           schema:
             type: string
           required: true
+          description: Access token
       responses:
         '200':
           description: Success sign out.
-  /user/updateData:
+  /api/v1/user/getData:
+    get:
+      tags:
+        - User service
+      description: Get user data.
+      operationId: userGetData
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Access token
+      responses:
+        '200':
+          description: Success getting user data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserData'
+        '403':
+          description: Unauthorized request.
+  /api/v1/user/updateData:
     post:
       tags:
         - User service
       description: Update user data.
       operationId: userDataUpdate
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Access token
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserDataUpdateRequest'
+              $ref: '#/components/schemas/UserData'
       responses:
         '200':
           description: Success updating user data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserData'
         '403':
           description: Unauthorized request.
-  /support/createTicket:
+  /api/v1/support/createTicket:
     post:
       tags:
         - Support service
@@ -146,10 +181,10 @@ components:
           example: '9999999999'
         otpCode:
           type: string
-          minLength: 6
-          maxLength: 6
+          minLength: 5
+          maxLength: 5
           description: OTP code.
-          example: '123456'
+          example: '12345'
     SignInSuccessResponse:
       type: object
       properties:
@@ -176,18 +211,12 @@ components:
         message:
           type: string
           description: Error message.
-    UserDataUpdateRequest:
+    UserData:
       type: object
       required:
-        - phone
         - firstName
         - nickName
       properties:
-        phone:
-          type: string
-          pattern: '^\d{10}$'
-          description: Mobile phone number.
-          example: '9999999999'
         firstName:
           type: string
           pattern: '^[A-Za-zА-Яа-я\s]*$'
