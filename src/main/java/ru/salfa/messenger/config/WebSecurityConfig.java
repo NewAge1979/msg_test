@@ -1,13 +1,10 @@
 package ru.salfa.messenger.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,7 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import ru.salfa.messenger.repository.UserRepository;
 import ru.salfa.messenger.security.JwtEntryPoint;
 import ru.salfa.messenger.security.JwtFilter;
-import ru.salfa.messenger.security.PhoneAuthenticationDetailsSource;
 import ru.salfa.messenger.security.PhoneOtpAuthenticationProvider;
 import ru.salfa.messenger.service.OtpService;
 
@@ -43,7 +39,6 @@ public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
     private final JwtEntryPoint jwtEntryPoint;
-    private final PhoneAuthenticationDetailsSource phoneAuthenticationDetailsSource;
     private final UserRepository userRepository;
     private final OtpService otpService;
 
@@ -71,8 +66,7 @@ public class WebSecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtEntryPoint))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .formLogin(f -> f.authenticationDetailsSource(phoneAuthenticationDetailsSource));
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
