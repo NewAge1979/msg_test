@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -14,7 +15,6 @@ import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
 import ru.salfa.messenger.service.ChatService;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +44,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     @SneakyThrows
-    public void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) {
+    public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) {
         try {
             var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
             msg.handler(chatService, listeners,
