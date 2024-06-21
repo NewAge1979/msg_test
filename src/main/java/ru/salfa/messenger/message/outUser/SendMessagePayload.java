@@ -42,12 +42,12 @@ public class SendMessagePayload extends MessageOutUser {
         var participantPhoneList = chat.getParticipants().stream().map(User::getPhone)
                 .filter(phone -> !phone.equals(userPhone)).toList();
 
-        if(chatIsCreated.isCreated()){
+        if (chatIsCreated.isCreated()) {
             var creatChatPayload = new ChatCreatedPayload();
             creatChatPayload.setChatId(chat.getId());
             creatChatPayload.setSender(chat.getParticipants().stream()
-                    .filter(user->user.getPhone().equals(userPhone)).findFirst()
-                    .orElseThrow(()->new RuntimeException("User not found"))
+                    .filter(user -> user.getPhone().equals(userPhone)).findFirst()
+                    .orElseThrow(() -> new RuntimeException("User not found"))
                     .getId());
             for (var participantPhone : participantPhoneList) {
                 if (listeners.containsKey(participantPhone)) {

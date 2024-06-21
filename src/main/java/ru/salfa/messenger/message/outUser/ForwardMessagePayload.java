@@ -70,7 +70,6 @@ public class ForwardMessagePayload extends MessageOutUser {
 
         }
 
-
         successPayload.setCreated(chatIsCreated.isCreated());
         successPayload.setChatId(chatId);
 

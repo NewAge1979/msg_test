@@ -16,6 +16,7 @@ import ru.salfa.messenger.message.toUser.*;
         property = "type"
 )
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = ExceptionPayload.class, name = ExceptionPayload.TYPE),
         @JsonSubTypes.Type(value = ChatClearedPayload.class, name = ChatClearedPayload.TYPE),
         @JsonSubTypes.Type(value = ChatCreatedPayload.class, name = ChatCreatedPayload.TYPE),
         @JsonSubTypes.Type(value = ChatListPayload.class, name = ChatListPayload.TYPE),
@@ -24,7 +25,7 @@ import ru.salfa.messenger.message.toUser.*;
         @JsonSubTypes.Type(value = SearchResultsPayload.class, name = SearchResultsPayload.TYPE),
         @JsonSubTypes.Type(value = SuccessSendPayload.class, name = SuccessSendPayload.TYPE)
 })
-public abstract class MessageToUser {
+public class MessageToUser {
     @JsonIgnore
     private String type;
 

@@ -31,7 +31,7 @@ public class SearchMessagesPayload extends MessageOutUser {
     @Override
     @SneakyThrows
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
-        var listMessageDto = service.searchMessage(chatId,searchQuery, userPhone);
+        var listMessageDto = service.searchMessage(chatId, searchQuery, userPhone);
 
         var searchResultPayload = new SearchResultsPayload();
         searchResultPayload.setMessages(listMessageDto);

@@ -2,15 +2,16 @@ package ru.salfa.messenger.handler;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatListPayload;
+import ru.salfa.messenger.message.toUser.ExceptionPayload;
 import ru.salfa.messenger.service.ChatService;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> listeners = new ConcurrentHashMap<>();
 
     @Override
+    @SneakyThrows
     public void afterConnectionEstablished(WebSocketSession session) {
         var chatListPayload = new ChatListPayload();
         var phone = (Objects.requireNonNull(session.getPrincipal())).getName();
@@ -41,11 +43,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    @Transactional
-    public void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) throws IOException {
-        var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
-        msg.handler(chatService, listeners,
-                (Objects.requireNonNull(session.getPrincipal())).getName());
+    @SneakyThrows
+    public void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) {
+        try {
+            var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
+            msg.handler(chatService, listeners,
+                    (Objects.requireNonNull(session.getPrincipal())).getName());
+        } catch (Exception e) {
+            var msg = new ExceptionPayload();
+            msg.setRequest(message.getPayload());
+            msg.setException(e.getMessage());
+            chatService.sendMessage(session, msg);
+        }
     }
 
     @Override
@@ -55,7 +64,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
+    @SneakyThrows
     public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) {
-        log.error(exception.getMessage());
+        var msg = new ExceptionPayload();
+        msg.setException(exception.getMessage());
+        chatService.sendMessage(session, msg);
     }
 }

@@ -38,7 +38,7 @@ public class DeleteMessagePayload extends MessageOutUser {
 
         messagePayload.setChatId(chatId);
         messagePayload.setMessageId(messageId);
-        service.deleteMessage(messageId, phone, !deleteForEveryOne);
+        service.deleteMessage(messageId, phone, deleteForEveryOne);
         service.sendMessage(listeners.get(phone), messagePayload);
     }
 }

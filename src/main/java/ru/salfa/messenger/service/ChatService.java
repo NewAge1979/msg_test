@@ -10,6 +10,7 @@ import ru.salfa.messenger.dto.model.ChatsDto;
 import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageToUser;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ChatService {
@@ -19,13 +20,13 @@ public interface ChatService {
     @Transactional(readOnly = true)
     List<MessageDto> searchMessage(Long chatId, String query, String userPhone);
 
-    void clearChat(Long chatId, String userPhone);
+    boolean clearChat(Long chatId, String userPhone);
 
     MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
 
-    void deleteMessage(Long messageId, String userPhone, boolean isAll);
+    boolean deleteMessage(Long messageId, String userPhone, boolean isAll);
 
-    void sendMessage(WebSocketSession session, MessageToUser message);
+    boolean sendMessage(WebSocketSession session, MessageToUser message) throws IOException;
 
     ChatIsCreated getOrCreateChat(Long participantId, String userPhone);
 }

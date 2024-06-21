@@ -2,7 +2,6 @@ package ru.salfa.messenger.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
@@ -14,6 +13,9 @@ import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.entity.Chat;
 import ru.salfa.messenger.entity.Messages;
 import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.exception.ChatNotFoundException;
+import ru.salfa.messenger.exception.MessageNotFoundException;
+import ru.salfa.messenger.exception.UserNotFoundException;
 import ru.salfa.messenger.message.MessageToUser;
 import ru.salfa.messenger.repository.AttachmentsRepository;
 import ru.salfa.messenger.repository.ChatRepository;
@@ -24,6 +26,7 @@ import ru.salfa.messenger.utils.mapper.AttachmentsMapper;
 import ru.salfa.messenger.utils.mapper.ChatMapper;
 import ru.salfa.messenger.utils.mapper.MessageMapper;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,6 +57,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional(readOnly = true)
     public List<MessageDto> searchMessage(Long chatId, String query, String userPhone) {
+
         return messageRepository.findAll().stream()
                 .filter(msg -> msg.getChatId().getId().equals(chatId))
                 .filter(msg -> !msg.isDelete())
@@ -61,31 +65,32 @@ public class ChatServiceImpl implements ChatService {
                 .filter(msg -> msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
                 .map(messageMapper::toMessageDto)
                 .toList();
-
-//        User user = getUserByPhone(userPhone);
-//        return messageRepository.findMessagesByChatId(chatId).stream()
-//                .filter(msg -> !msg.isDelete() && !msg.getUserDeleteMessage().contains(user) &&
-//                        msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
-//                .map(messageMapper::toMessageDto)
-//                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void clearChat(Long chatId, String userPhone) {
+    public boolean clearChat(Long chatId, String userPhone) {
+        var msgList = messageRepository.findAll().stream()
+                .filter(msg -> msg.getChatId().getId().equals(chatId)).toList();
+        if (msgList.isEmpty()) {
+            return false;
+        }
         User user = getUserByPhone(userPhone);
-        messageRepository.findAll().stream()
-                .filter(msg -> msg.getChatId().getId().equals(chatId))
-                .forEach(msg -> msg.addUserDeleters(user));
+        msgList.forEach(msg -> msg.addUserDeleters(user));
+        return true;
     }
 
     @Override
     @Transactional
     public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) {
-        Chat chat = getChatById(chatId);
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
+
         User sender = getUserByPhone(senderPhone);
+
         var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
         attachmentsRepository.saveAll(attachmentsList);
+
         Messages msg = new Messages();
         msg.setMessage(message);
         msg.setChatId(chat);
@@ -99,9 +104,9 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public void deleteMessage(Long messageId, String userPhone, boolean isAll) {
+    public boolean deleteMessage(Long messageId, String userPhone, boolean isAll) {
         Messages msg = messageRepository.findById(messageId)
-                .orElseThrow(() -> new RuntimeException("Message not found"));
+                .orElseThrow(() -> new MessageNotFoundException("Message not found"));
         User user = getUserByPhone(userPhone);
 
         if (isAll && msg.getSenderId().getId().equals(user.getId())) {
@@ -109,12 +114,13 @@ public class ChatServiceImpl implements ChatService {
         } else {
             msg.addUserDeleters(user);
         }
+        return true;
     }
 
     @Override
-    @SneakyThrows
-    public void sendMessage(WebSocketSession session, MessageToUser message) {
+    public boolean sendMessage(WebSocketSession session, MessageToUser message) throws IOException {
         session.sendMessage(new TextMessage(jsonMapper.writeValueAsString(message)));
+        return true;
     }
 
     @Override
@@ -136,29 +142,17 @@ public class ChatServiceImpl implements ChatService {
         return chatIsCreated;
     }
 
-    @Transactional(readOnly = true)
-    public Chat getChatById(Long chatId) {
-        return chatRepository.findById(chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
-    }
-
-
-    @Transactional(readOnly = true)
-    public User getUserByPhone(String phone) {
+    private User getUserByPhone(String phone) {
         return userRepository.findByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    @Transactional(readOnly = true)
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     @Transactional
-    public Chat createChat(String userPhone, Long participantId) {
+    protected Chat createChat(String userPhone, Long participantId) {
         User owner = getUserByPhone(userPhone);
-        User participant = getUserById(participantId);
+
+        User participant = userRepository.findById(participantId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Chat chat = new Chat();
         chat.setName(owner.getFirstName());
@@ -166,6 +160,22 @@ public class ChatServiceImpl implements ChatService {
         chat.addParticipant(participant);
 
         return chatRepository.save(chat);
+    }
+
+    private List<Chat> getChatsByParticipantPhone(String phone) {
+        return chatRepository.findAll().stream()
+                .filter(chat -> chat.getParticipants()
+                        .stream().map(User::getPhone)
+                        .toList().contains(phone))
+                .toList();
+    }
+
+    private List<Chat> getChatsByParticipantId(Long id) {
+        return chatRepository.findAll().stream()
+                .filter(chat -> chat.getParticipants()
+                        .stream().map(User::getId)
+                        .toList().contains(id))
+                .toList();
     }
 
     private ChatsDto mapChatToChatDto(Chat chat, String phone) {
@@ -178,23 +188,5 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.toList());
         chatDto.setMessages(messageDtos);
         return chatDto;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Chat> getChatsByParticipantPhone(String phone) {
-        return chatRepository.findAll().stream()
-                .filter(chat -> chat.getParticipants()
-                        .stream().map(User::getPhone)
-                        .toList().contains(phone))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Chat> getChatsByParticipantId(Long id) {
-        return chatRepository.findAll().stream()
-                .filter(chat -> chat.getParticipants()
-                        .stream().map(User::getId)
-                        .toList().contains(id))
-                .toList();
     }
 }
