@@ -145,7 +145,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Transactional(readOnly = true)
     public User getUserByPhone(String phone) {
-        return userRepository.findByPhone(phone)
+        return userRepository.findByPhoneAndIsDeleted(phone, false)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 

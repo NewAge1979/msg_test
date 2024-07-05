@@ -23,7 +23,7 @@ public class PhoneOtpAuthenticationProvider extends DaoAuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        User user = userRepository.findByPhone(authentication.getName()).orElseThrow(
+        User user = userRepository.findByPhoneAndIsDeleted(authentication.getName(), false).orElseThrow(
                 () -> new UserNotFoundException("User not found.")
         );
         if (otpService.userIsBlockedByOTP(user.getId())) {

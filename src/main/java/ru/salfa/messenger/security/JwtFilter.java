@@ -35,7 +35,12 @@ public class JwtFilter extends OncePerRequestFilter {
         var authorization = request.getHeader(AUTHORIZATION);
         log.debug("Authorization: {}", authorization);
         if (StringUtils.isNotEmpty(authorization) && StringUtils.startsWith(authorization, BEARER_PREFIX)) {
-            var phone = jwtService.getPhoneFromAccessToken(authorization);
+            String phone;
+            if (request.getRequestURI().contains("refreshTokens")) {
+                phone = jwtService.getPhoneFromRefreshToken(authorization);
+            } else {
+                phone = jwtService.getPhoneFromAccessToken(authorization);
+            }
             if (StringUtils.isNotEmpty(phone) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailService.loadUserByUsername(phone);
                 if (jwtService.accessTokenIsValid(authorization, userDetails)) {
