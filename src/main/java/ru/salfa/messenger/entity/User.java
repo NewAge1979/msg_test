@@ -33,9 +33,9 @@ public class User implements UserDetails {
     @Column(name = "phone", nullable = false, length = 16)
     private String phone;
 
-    /*@Size(max = 512)
+    @Size(max = 512)
     @Column(name = "password_hash", length = 512)
-    private String passwordHash;*/
+    private String passwordHash;
 
     @Size(max = 64)
     @Column(name = "last_name", length = 64)

@@ -12,7 +12,6 @@ import ru.salfa.messenger.repository.UserRepository;
 import java.util.ArrayList;
 
 import static java.time.OffsetDateTime.now;
-import static java.time.OffsetDateTime.timeLineOrder;
 
 @Service("userDetailsService")
 @Transactional
@@ -22,7 +21,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
-        User user = userRepository.findByPhone(phone).orElseThrow(
+        User user = userRepository.findByPhoneAndIsDeleted(phone, false).orElseThrow(
                () -> new UsernameNotFoundException("User not found.")
         );
         /* Для случая хранения OTP кода в кэше.

@@ -101,17 +101,24 @@ paths:
             type: string
           required: true
           description: Access token
+        - in: query
+          name: phone
+          schema:
+            type: string
+            pattern: '^\d{10}$'
+          required: true
+          description: User phone.
       responses:
         '200':
           description: Success getting user data.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserData'
+                $ref: '#/components/schemas/UserDataResponse'
         '403':
           description: Unauthorized request.
   /api/v1/user/updateData:
-    post:
+    put:
       tags:
         - User service
       description: Update user data.
@@ -123,19 +130,26 @@ paths:
             type: string
           required: true
           description: Access token
+        - in: query
+          name: phone
+          schema:
+            type: string
+            pattern: '^\d{10}$'
+          required: true
+          description: User phone.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserData'
+              $ref: '#/components/schemas/UserDataUpdateRequest'
       responses:
         '200':
           description: Success updating user data.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserData'
+                $ref: '#/components/schemas/UserDataResponse'
         '403':
           description: Unauthorized request.
   /api/v1/support/createTicket:
@@ -211,12 +225,49 @@ components:
         message:
           type: string
           description: Error message.
-    UserData:
+    UserDataUpdateRequest:
       type: object
       required:
         - firstName
         - nickName
       properties:
+        firstName:
+          type: string
+          pattern: '^[A-Za-zА-Яа-я\s]*$'
+          maxLength: 64
+          description: First name.
+          example: 'John'
+        lastName:
+          type: string
+          pattern: '^[A-Za-zА-Яа-я\s]*$'
+          maxLength: 64
+          nullable: true
+          description: Last name.
+          example: 'Doe'
+        nickName:
+          type: string
+          minLength: 5
+          maxLength: 32
+          description: Nickname.
+          example: 'John Doe'
+        aboutMe:
+          type: string
+          maxLength: 160
+          nullable: true
+          description: About me.
+          example: ''
+    UserDataResponse:
+      type: object
+      required:
+        - phone
+        - firstName
+        - nickName
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: Mobile phone number.
+          example: '9999999999'
         firstName:
           type: string
           pattern: '^[A-Za-zА-Яа-я\s]*$'

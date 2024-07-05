@@ -3,6 +3,7 @@ package ru.salfa.messenger.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ public class AuthenticationService {
     private final NewUserRepository newUserRepository;
 
     public void getOtpCode(GetOtpCodeRequest request) {
-        log.debug("Phone: {}", request.phone());
         if (!userRepository.existsByPhone(request.phone())) {
             userRepository.save(
                     User.builder()
@@ -44,16 +44,15 @@ public class AuthenticationService {
                             .build()
             );
         }
-        User user = userRepository.findByPhone(request.phone()).orElseThrow(
+        User user = userRepository.findByPhoneAndIsDeleted(request.phone(), false).orElseThrow(
                 () -> new UserNotFoundException("User not found.")
         );
         otpService.sendOTPCode(user);
     }
 
     public SignInResponse signIn(SignInRequest request) {
-        log.debug("{}", request.toString());
         // Update user data, create and send tokens.
-        User user = userRepository.findByPhone(request.phone()).orElseThrow(
+        User user = userRepository.findByPhoneAndIsDeleted(request.phone(), false).orElseThrow(
                 () -> new UserNotFoundException("User not found.")
         );
         try {
@@ -62,11 +61,6 @@ public class AuthenticationService {
             var jwtAccessToken = jwtService.createAccessToken(userDetails);
             var jwtRefreshToken = jwtService.createRefreshToken(userDetails);
             boolean isNewUser = newUserRepository.existsById(user.getId());
-
-            log.debug("jwtAccessToken: {}", jwtAccessToken);
-            log.debug("jwtRefreshToken: {}", jwtRefreshToken);
-            log.debug("isNewUser: {}", isNewUser);
-
             return new SignInResponse(jwtAccessToken, jwtRefreshToken, isNewUser);
         } catch (UsernameNotFoundException e) {
             throw new UserNotFoundException("User not found.");
@@ -74,7 +68,10 @@ public class AuthenticationService {
     }
 
     public TokensResponse refreshTokens() {
-        return new TokensResponse("111", "222");
+        UserDetails userDetails = userDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        var jwtAccessToken = jwtService.createAccessToken(userDetails);
+        var jwtRefreshToken = jwtService.createRefreshToken(userDetails);
+        return new TokensResponse(jwtAccessToken, jwtRefreshToken);
     }
 
     public void signOut() {

@@ -31,13 +31,13 @@ class UserDetailServiceTest {
 
     @Test
     void loadUserByUsernameSuccess() {
-        given(userRepository.findByPhone(PHONE)).willReturn(Optional.of(user));
+        given(userRepository.findByPhoneAndIsDeleted(PHONE, false)).willReturn(Optional.of(user));
         assertDoesNotThrow(() -> userDetailService.loadUserByUsername(PHONE));
     }
 
     @Test
     void loadUserByUsernameError() {
-        given(userRepository.findByPhone(PHONE)).willReturn(Optional.empty());
+        given(userRepository.findByPhoneAndIsDeleted(PHONE, false)).willReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> userDetailService.loadUserByUsername(PHONE));
     }
 }
