@@ -14,8 +14,10 @@ import java.util.Map;
 @JsonTypeName(BlockContactPayload.ACTION)
 public class BlockContactPayload extends MessageOutUser {
     public static final String ACTION = "block_contact";
+
     @JsonProperty("user_id")
     private Long userId;
+
     @Override
     public String getAction() {
         return ACTION;

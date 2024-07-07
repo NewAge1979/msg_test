@@ -175,7 +175,7 @@ public class ChatServiceImpl implements ChatService {
     protected Chat createChat(String userPhone, Long participantId) {
         User owner = getUserByPhone(userPhone);
 
-        User participant = userRepository.findById(participantId)
+        User participant = userRepository.findByIdAndIsDeleted(participantId, false)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Chat chat = new Chat();

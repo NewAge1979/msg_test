@@ -380,7 +380,7 @@ class ChatServiceImplTest {
     void testGetOrCreateChat_ExistingChat() {
         // given
         when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
-        when(userRepository.findById(defaultId)).thenReturn(Optional.of(new User()));
+        when(userRepository.findByIdAndIsDeleted(defaultId, false)).thenReturn(Optional.of(new User()));
         when(chatRepository.findAll()).thenReturn(List.of(chat));
 
         // when
@@ -397,7 +397,7 @@ class ChatServiceImplTest {
         // given
         when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
         long participantId = 2L;
-        when(userRepository.findById(participantId)).thenReturn(Optional.of(new User()));
+        when(userRepository.findByIdAndIsDeleted(participantId, false)).thenReturn(Optional.of(new User()));
         when(chatRepository.findAll()).thenReturn(List.of());
         when(chatRepository.save(any(Chat.class))).thenReturn(chat);
 
