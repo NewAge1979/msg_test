@@ -3,10 +3,7 @@ package ru.salfa.messenger.message;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.message.outUser.*;
 import ru.salfa.messenger.service.ChatService;
@@ -16,6 +13,7 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 @AllArgsConstructor
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -28,7 +26,8 @@ import java.util.Map;
         @JsonSubTypes.Type(value = SearchMessagesPayload.class, name = SearchMessagesPayload.ACTION),
         @JsonSubTypes.Type(value = ForwardMessagePayload.class, name = ForwardMessagePayload.ACTION),
         @JsonSubTypes.Type(value = DeleteMessagePayload.class, name = DeleteMessagePayload.ACTION),
-        @JsonSubTypes.Type(value = SearchUserPayload.class, name = SearchUserPayload.ACTION)
+        @JsonSubTypes.Type(value = SearchUserPayload.class, name = SearchUserPayload.ACTION),
+        @JsonSubTypes.Type(value = BlockContactPayload.class, name = BlockContactPayload.ACTION)
 })
 public abstract class MessageOutUser {
 

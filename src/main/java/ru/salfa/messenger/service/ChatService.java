@@ -29,4 +29,7 @@ public interface ChatService {
 
     @Transactional
     List<UserDto> getListUserDtoByNickname(String nickname);
+
+    @Transactional
+    boolean blockedContact(Long userId, String phone);
 }

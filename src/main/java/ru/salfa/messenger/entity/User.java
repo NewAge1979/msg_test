@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -77,6 +78,9 @@ public class User implements UserDetails {
     @Column(name = "personal_information", length = Integer.MAX_VALUE)
     private String personalInformation;
 
+    @ManyToMany
+    private List<User> blockedContacts = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -110,5 +114,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !isDeleted;
+    }
+
+    public void  blockContact(User user) {
+        blockedContacts.add(user);
     }
 }

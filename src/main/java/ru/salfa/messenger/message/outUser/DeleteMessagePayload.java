@@ -11,10 +11,7 @@ import ru.salfa.messenger.service.ChatService;
 
 import java.util.Map;
 
-@Getter
 @Setter
-@NoArgsConstructor
-@ToString
 @JsonTypeName(DeleteMessagePayload.ACTION)
 public class DeleteMessagePayload extends MessageOutUser {
     public static final String ACTION = "delete_message";

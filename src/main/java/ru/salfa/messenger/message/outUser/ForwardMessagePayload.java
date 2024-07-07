@@ -11,17 +11,14 @@ import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatCreatedPayload;
 import ru.salfa.messenger.message.toUser.ChatMessagePayload;
-import ru.salfa.messenger.message.toUser.SuccessSendPayload;
+import ru.salfa.messenger.message.toUser.SuccessActionPayload;
 import ru.salfa.messenger.service.ChatService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-@Getter
 @Setter
-@NoArgsConstructor
-@ToString
 @JsonTypeName(ForwardMessagePayload.ACTION)
 public class ForwardMessagePayload extends MessageOutUser {
     public static final String ACTION = "forward_message";
@@ -48,7 +45,7 @@ public class ForwardMessagePayload extends MessageOutUser {
     @Override
     @SneakyThrows
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
-        var successPayload = new SuccessSendPayload();
+        var successPayload = new SuccessActionPayload();
         var chatIsCreated = service.getOrCreateChat(participantId, userPhone);
         var participantPhone = chatIsCreated.getChat().getParticipants()
                 .stream().filter(p -> p.getId().equals(participantId)).findFirst()

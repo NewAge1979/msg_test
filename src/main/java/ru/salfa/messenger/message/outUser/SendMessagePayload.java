@@ -9,17 +9,14 @@ import ru.salfa.messenger.entity.User;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatCreatedPayload;
 import ru.salfa.messenger.message.toUser.ChatMessagePayload;
-import ru.salfa.messenger.message.toUser.SuccessSendPayload;
+import ru.salfa.messenger.message.toUser.SuccessActionPayload;
 import ru.salfa.messenger.service.ChatService;
 
 import java.util.List;
 import java.util.Map;
 
 @Setter
-@Getter
-@NoArgsConstructor
 @JsonTypeName(SendMessagePayload.ACTION)
-@ToString
 public class SendMessagePayload extends MessageOutUser {
     public static final String ACTION = "send_message";
 
@@ -57,7 +54,7 @@ public class SendMessagePayload extends MessageOutUser {
 
         }
 
-        var successPayload = new SuccessSendPayload();
+        var successPayload = new SuccessActionPayload();
         var messagePayload = new ChatMessagePayload();
 
         var msgDto = service.createAndSaveMsg(chat.getId(), userPhone, message, attachments);

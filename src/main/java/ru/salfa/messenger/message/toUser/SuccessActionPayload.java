@@ -11,9 +11,9 @@ import ru.salfa.messenger.message.MessageToUser;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonTypeName(SuccessSendPayload.TYPE)
+@JsonTypeName(SuccessActionPayload.TYPE)
 @ToString
-public class SuccessSendPayload extends MessageToUser {
+public class SuccessActionPayload extends MessageToUser {
     public static final String TYPE = "confirmation";
 
     @JsonProperty("chat_id")

@@ -10,11 +10,8 @@ import ru.salfa.messenger.service.ChatService;
 
 import java.util.Map;
 
-@Getter
 @Setter
-@NoArgsConstructor
 @JsonTypeName(SearchMessagesPayload.ACTION)
-@ToString
 public class SearchMessagesPayload extends MessageOutUser {
     public static final String ACTION = "search_messages";
 

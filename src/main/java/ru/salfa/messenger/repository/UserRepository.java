@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPhoneAndIsDeleted(String phone, boolean isDeleted);
+    Optional<User> findByIdAndIsDeleted(Long id, boolean isDeleted);
     List<User> findByNicknameContainingIgnoreCaseAndIsDeleted(String nickname, boolean isDeleted);
 
     boolean existsByPhone(String phone);
