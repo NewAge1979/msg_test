@@ -27,7 +27,8 @@ import java.util.Map;
         @JsonSubTypes.Type(value = ClearChatPayload.class, name = ClearChatPayload.ACTION),
         @JsonSubTypes.Type(value = SearchMessagesPayload.class, name = SearchMessagesPayload.ACTION),
         @JsonSubTypes.Type(value = ForwardMessagePayload.class, name = ForwardMessagePayload.ACTION),
-        @JsonSubTypes.Type(value = DeleteMessagePayload.class, name = DeleteMessagePayload.ACTION)
+        @JsonSubTypes.Type(value = DeleteMessagePayload.class, name = DeleteMessagePayload.ACTION),
+        @JsonSubTypes.Type(value = SearchUserPayload.class, name = SearchUserPayload.ACTION)
 })
 public abstract class MessageOutUser {
 

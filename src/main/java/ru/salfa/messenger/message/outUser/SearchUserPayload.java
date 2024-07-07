@@ -6,23 +6,21 @@ import lombok.*;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.SearchMessagesResultsPayload;
+import ru.salfa.messenger.message.toUser.SearchUsersResultsPayload;
 import ru.salfa.messenger.service.ChatService;
 
-import java.util.Map;
 
+import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonTypeName(SearchMessagesPayload.ACTION)
+@JsonTypeName(SearchUserPayload.ACTION)
 @ToString
-public class SearchMessagesPayload extends MessageOutUser {
-    public static final String ACTION = "search_messages";
+public class SearchUserPayload extends MessageOutUser {
+    public static final String ACTION = "search_user";
 
-    @JsonProperty("search_query")
-    private String searchQuery;
-    @JsonProperty("chat_id")
-    private Long chatId;
-
+    @JsonProperty("search_nickname")
+    private String nickname;
     @Override
     public String getAction() {
         return ACTION;
@@ -31,10 +29,10 @@ public class SearchMessagesPayload extends MessageOutUser {
     @Override
     @SneakyThrows
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
-        var listMessageDto = service.searchMessage(chatId, searchQuery, userPhone);
+        var userDtos = service.getListUserDtoByNickname(nickname);
+        var payload = new SearchUsersResultsPayload();
+        payload.setUsers(userDtos);
 
-        var searchResultPayload = new SearchMessagesResultsPayload();
-        searchResultPayload.setMessages(listMessageDto);
-        service.sendMessage(listeners.get(userPhone), searchResultPayload);
+        service.sendMessage(listeners.get(userPhone), payload);
     }
 }

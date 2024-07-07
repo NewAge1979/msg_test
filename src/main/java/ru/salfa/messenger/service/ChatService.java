@@ -4,10 +4,7 @@ package ru.salfa.messenger.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketSession;
-import ru.salfa.messenger.dto.model.AttachmentsDto;
-import ru.salfa.messenger.dto.model.ChatIsCreated;
-import ru.salfa.messenger.dto.model.ChatsDto;
-import ru.salfa.messenger.dto.model.MessageDto;
+import ru.salfa.messenger.dto.model.*;
 import ru.salfa.messenger.message.MessageToUser;
 
 import java.io.IOException;
@@ -29,4 +26,7 @@ public interface ChatService {
     boolean sendMessage(WebSocketSession session, MessageToUser message) throws IOException;
 
     ChatIsCreated getOrCreateChat(Long participantId, String userPhone);
+
+    @Transactional
+    List<UserDto> getListUserDtoByNickname(String nickname);
 }

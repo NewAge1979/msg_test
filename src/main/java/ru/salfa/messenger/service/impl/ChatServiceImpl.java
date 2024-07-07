@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import ru.salfa.messenger.dto.model.AttachmentsDto;
-import ru.salfa.messenger.dto.model.ChatIsCreated;
-import ru.salfa.messenger.dto.model.ChatsDto;
-import ru.salfa.messenger.dto.model.MessageDto;
+import ru.salfa.messenger.dto.model.*;
 import ru.salfa.messenger.entity.Chat;
 import ru.salfa.messenger.entity.Messages;
 import ru.salfa.messenger.entity.User;
@@ -25,6 +22,7 @@ import ru.salfa.messenger.service.ChatService;
 import ru.salfa.messenger.utils.mapper.AttachmentsMapper;
 import ru.salfa.messenger.utils.mapper.ChatMapper;
 import ru.salfa.messenger.utils.mapper.MessageMapper;
+import ru.salfa.messenger.utils.mapper.UserMapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -45,6 +43,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMapper chatMapper;
     private final MessageMapper messageMapper;
     private final AttachmentsMapper attachmentsMapper;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -142,8 +141,14 @@ public class ChatServiceImpl implements ChatService {
         return chatIsCreated;
     }
 
+    @Override
+    @Transactional
+    public List<UserDto> getListUserDtoByNickname(String nickname){
+        return userMapper.toUserDtos(userRepository.findByNicknameContainingIgnoreCaseAndIsDeleted(nickname, false));
+    }
+
     private User getUserByPhone(String phone) {
-        return userRepository.findByPhone(phone)
+        return userRepository.findByPhoneAndIsDeleted(phone, false)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 

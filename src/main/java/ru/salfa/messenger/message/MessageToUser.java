@@ -22,8 +22,9 @@ import ru.salfa.messenger.message.toUser.*;
         @JsonSubTypes.Type(value = ChatListPayload.class, name = ChatListPayload.TYPE),
         @JsonSubTypes.Type(value = ChatMessagePayload.class, name = ChatMessagePayload.TYPE),
         @JsonSubTypes.Type(value = MessageDeletedPayload.class, name = MessageDeletedPayload.TYPE),
-        @JsonSubTypes.Type(value = SearchResultsPayload.class, name = SearchResultsPayload.TYPE),
-        @JsonSubTypes.Type(value = SuccessSendPayload.class, name = SuccessSendPayload.TYPE)
+        @JsonSubTypes.Type(value = SearchMessagesResultsPayload.class, name = SearchMessagesResultsPayload.TYPE),
+        @JsonSubTypes.Type(value = SuccessSendPayload.class, name = SuccessSendPayload.TYPE),
+        @JsonSubTypes.Type(value = SearchUsersResultsPayload.class, name = SearchUsersResultsPayload.TYPE)
 })
 public class MessageToUser {
     @JsonIgnore

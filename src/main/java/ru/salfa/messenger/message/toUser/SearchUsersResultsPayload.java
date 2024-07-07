@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.salfa.messenger.dto.model.MessageDto;
+import ru.salfa.messenger.dto.model.UserDto;
 import ru.salfa.messenger.message.MessageToUser;
 
 import java.util.List;
@@ -13,11 +13,11 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonTypeName(SearchResultsPayload.TYPE)
+@JsonTypeName(SearchUsersResultsPayload.TYPE)
 @ToString
-public class SearchResultsPayload extends MessageToUser {
-    public static final String TYPE = "search_results";
-    private List<MessageDto> messages;
+public class SearchUsersResultsPayload extends MessageToUser {
+    public static final String TYPE = "search_user_results";
+    private List<UserDto> users;
 
     @Override
     public String getType() {

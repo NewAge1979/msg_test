@@ -210,7 +210,7 @@ class ChatServiceImplTest {
         // given
         Messages message = createMessage(chat, user, false);
         when(messageRepository.findAll()).thenReturn(List.of(message));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
 
         // when
         var result = chatService.clearChat(defaultId, phone);
@@ -264,7 +264,7 @@ class ChatServiceImplTest {
         List<AttachmentsDto> attachments = List.of(new AttachmentsDto());
         MessageDto messageDto = new MessageDto();
         when(chatRepository.findById(defaultId)).thenReturn(Optional.of(chat));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
         when(attachmentsMapper.toAttachmentsList(attachments)).thenReturn(List.of());
         when(messageMapper.toMessageDto(any(Messages.class))).thenReturn(messageDto);
 
@@ -293,7 +293,7 @@ class ChatServiceImplTest {
         String messageText = "Hello";
         List<AttachmentsDto> attachments = List.of(new AttachmentsDto());
         when(chatRepository.findById(defaultId)).thenReturn(Optional.of(chat));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.empty());
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.empty());
 
         // when then
         assertThrows(UserNotFoundException.class, () -> chatService.createAndSaveMsg(defaultId, phone, messageText, attachments));
@@ -306,7 +306,7 @@ class ChatServiceImplTest {
         Messages message = new Messages();
         message.setSenderId(user);
         when(messageRepository.findById(defaultId)).thenReturn(Optional.of(message));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
 
         // when
         boolean result = chatService.deleteMessage(defaultId, phone, isAll);
@@ -326,7 +326,7 @@ class ChatServiceImplTest {
         sender.setId(2L);
         message.setSenderId(sender);
         when(messageRepository.findById(defaultId)).thenReturn(Optional.of(message));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
 
         // when
         boolean result = chatService.deleteMessage(defaultId, phone, isAll);
@@ -343,7 +343,7 @@ class ChatServiceImplTest {
         boolean isAll = false;
         Messages message = new Messages();
         when(messageRepository.findById(defaultId)).thenReturn(Optional.of(message));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
 
         // when
         boolean result = chatService.deleteMessage(defaultId, phone, isAll);
@@ -370,7 +370,7 @@ class ChatServiceImplTest {
         boolean isAll = true;
         Messages message = new Messages();
         when(messageRepository.findById(defaultId)).thenReturn(Optional.of(message));
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.empty());
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.empty());
 
         // when then
         assertThrows(UserNotFoundException.class, () -> chatService.deleteMessage(defaultId, phone, isAll));
@@ -379,7 +379,7 @@ class ChatServiceImplTest {
     @Test
     void testGetOrCreateChat_ExistingChat() {
         // given
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
         when(userRepository.findById(defaultId)).thenReturn(Optional.of(new User()));
         when(chatRepository.findAll()).thenReturn(List.of(chat));
 
@@ -395,7 +395,7 @@ class ChatServiceImplTest {
     @Test
     void testGetOrCreateChat_NewChat() {
         // given
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.of(user));
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
         long participantId = 2L;
         when(userRepository.findById(participantId)).thenReturn(Optional.of(new User()));
         when(chatRepository.findAll()).thenReturn(List.of());
@@ -413,7 +413,7 @@ class ChatServiceImplTest {
     @Test
     void testGetOrCreateChat_UserNotFound() {
         // given
-        when(userRepository.findByPhone(phone)).thenReturn(Optional.empty());
+        when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.empty());
 
         // when then
         assertThrows(UserNotFoundException.class, () -> chatService.getOrCreateChat(defaultId, phone));
