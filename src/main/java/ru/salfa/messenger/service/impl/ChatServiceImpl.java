@@ -2,8 +2,6 @@ package ru.salfa.messenger.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
@@ -37,7 +35,6 @@ import static ru.salfa.messenger.utils.SimpleObjectMapper.getObjectMapper;
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
-    private static final Logger log = LoggerFactory.getLogger(ChatServiceImpl.class);
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
@@ -128,7 +125,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public ChatIsCreated getOrCreateChat(Long participantId, String userPhone) {
-        if (!userIsBlocked(userPhone, participantId)){
+        if (!userIsBlocked(userPhone, participantId)) {
             var chatIsCreated = new ChatIsCreated();
             AtomicBoolean isCreated = new AtomicBoolean(false);
             var chats = getChatsByParticipantId(participantId).stream()
@@ -142,8 +139,7 @@ public class ChatServiceImpl implements ChatService {
             chatIsCreated.setChat(chats);
             chatIsCreated.setCreated(isCreated.get());
             return chatIsCreated;
-        }
-        else
+        } else
             throw new RuntimeException("we are blocked by user");
 
     }
@@ -152,20 +148,20 @@ public class ChatServiceImpl implements ChatService {
         var user = getUserByPhone(userPhone);
 
         return userRepository.findByIdAndIsDeleted(participantId, false)
-                .orElseThrow(()->new UserNotFoundException("User not found"))
+                .orElseThrow(() -> new UserNotFoundException("User not found"))
                 .getBlockedContacts().contains(user);
     }
 
     @Override
-    public List<UserDto> getListUserDtoByNickname(String nickname){
+    public List<UserDto> getListUserDtoByNickname(String nickname) {
         return userMapper.toUserDtos(userRepository.findByNicknameContainingIgnoreCaseAndIsDeleted(nickname, false));
     }
 
     @Override
     @Transactional
-    public boolean blockedContact(Long userId, String phone){
+    public boolean blockedContact(Long userId, String phone) {
         var user = userRepository.findByIdAndIsDeleted(userId, false)
-                .orElseThrow(()->new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         getUserByPhone(phone).blockContact(user);
         return true;
     }
