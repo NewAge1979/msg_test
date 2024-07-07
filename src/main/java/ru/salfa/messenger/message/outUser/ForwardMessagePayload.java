@@ -4,7 +4,9 @@ package ru.salfa.messenger.message.outUser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.AttachmentsDto;
 import ru.salfa.messenger.dto.model.MessageDto;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Setter
+@Getter
 @JsonTypeName(ForwardMessagePayload.ACTION)
 public class ForwardMessagePayload extends MessageOutUser {
     public static final String ACTION = "forward_message";
@@ -58,7 +61,7 @@ public class ForwardMessagePayload extends MessageOutUser {
             creatChatPayload.setChatId(chatId);
             creatChatPayload.setSender(chat.getParticipants().stream()
                     .filter(user -> user.getPhone().equals(userPhone)).findFirst()
-                    .orElseThrow(()->new RuntimeException("User not found"))
+                    .orElseThrow(() -> new RuntimeException("User not found"))
                     .getId());
 
             if (listeners.containsKey(participantPhone)) {
