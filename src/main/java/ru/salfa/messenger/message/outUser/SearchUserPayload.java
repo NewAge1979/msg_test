@@ -2,13 +2,12 @@ package ru.salfa.messenger.message.outUser;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.*;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.message.MessageOutUser;
-import ru.salfa.messenger.message.toUser.SearchMessagesResultsPayload;
 import ru.salfa.messenger.message.toUser.SearchUsersResultsPayload;
 import ru.salfa.messenger.service.ChatService;
-
 
 import java.util.Map;
 
@@ -19,6 +18,7 @@ public class SearchUserPayload extends MessageOutUser {
 
     @JsonProperty("search_nickname")
     private String nickname;
+
     @Override
     public String getAction() {
         return ACTION;
