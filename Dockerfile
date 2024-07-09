@@ -1,20 +1,15 @@
-# Используем официальный образ OpenJDK в качестве базового образа
-FROM openjdk:17-jdk-slim
-
-# Устанавливаем рабочую директорию в контейнере
-WORKDIR /app
-
-# Копируем файл с зависимостями приложения
+FROM bellsoft/liberica-openjre-debian:22.0.1 AS layers
+WORKDIR /application
 COPY target/*.jar app.jar
+RUN java -Djarmode=layertools -jar app.jar extract
 
-# Определяем переменные окружения для подключения к базе данных
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5434/salfa_msg
-ENV SPRING_DATASOURCE_USERNAME=sandbox
-ENV SPRING_DATASOURCE_PASSWORD=sandbox
+FROM bellsoft/liberica-openjre-debian:22.0.1
+VOLUME /tmp
+RUN useradd -ms /bin/bash spring-user
+USER spring-user
+COPY --from=layers /application/dependencies/ ./
+COPY --from=layers /application/spring-boot-loader/ ./
+COPY --from=layers /application/snapshot-dependencies/ ./
+COPY --from=layers /application/application/ ./
 
-
-# Команда для запуска приложения
-ENTRYPOINT ["sh", "-c", "java -jar /app/app.jar"]
-
-# Указываем порт, который будет слушать приложение
-EXPOSE 8080
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
