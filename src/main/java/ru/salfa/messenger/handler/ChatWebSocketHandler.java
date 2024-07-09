@@ -1,5 +1,6 @@
 package ru.salfa.messenger.handler;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -51,10 +52,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             ValidationUtil.validate(msg);
             msg.handler(chatService, listeners,
                     (Objects.requireNonNull(session.getPrincipal())).getName());
-        } catch (Exception e) {
+        } catch (Exception exception) {
             var msg = new ExceptionPayload();
             msg.setRequest(message.getPayload());
-            msg.setException(e.getMessage());
+            log.error(exception.getMessage(), exception);
+
+            if (exception instanceof UnrecognizedPropertyException) {
+                msg.setException("An error occurred during message processing. Check messages field.");
+            } else {
+                msg.setException(exception.getMessage());
+            }
+
             chatService.sendMessage(session, msg);
         }
     }
@@ -69,7 +77,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @SneakyThrows
     public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) {
         var msg = new ExceptionPayload();
+        log.error(exception.getMessage(), exception);
         msg.setException(exception.getMessage());
+
         chatService.sendMessage(session, msg);
     }
 }
