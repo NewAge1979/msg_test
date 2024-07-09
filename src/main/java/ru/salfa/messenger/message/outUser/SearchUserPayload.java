@@ -16,6 +16,7 @@ import java.util.Map;
 public class SearchUserPayload extends MessageOutUser {
     public static final String ACTION = "search_user";
 
+
     @JsonProperty("search_nickname")
     private String nickname;
 

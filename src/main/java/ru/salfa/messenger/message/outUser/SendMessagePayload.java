@@ -2,6 +2,8 @@ package ru.salfa.messenger.message.outUser;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.AttachmentsDto;
@@ -20,9 +22,14 @@ import java.util.Map;
 public class SendMessagePayload extends MessageOutUser {
     public static final String ACTION = "send_message";
 
+    @NotBlank(message = "Message cannot be null")
     private String message;
+
+    @NotBlank(message = "Participant ID cannot be null")
+    @Pattern(regexp = "^[1-9]\\d*$", message = "Field must be a number greater than 0")
     @JsonProperty("participant_id")
-    private Long participantId;
+    private String participantId;
+
     private List<AttachmentsDto> attachments;
 
     @Override
@@ -34,7 +41,7 @@ public class SendMessagePayload extends MessageOutUser {
     @Override
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
 
-        var chatIsCreated = service.getOrCreateChat(participantId, userPhone);
+        var chatIsCreated = service.getOrCreateChat(Long.parseLong(participantId), userPhone);
         var chat = chatIsCreated.getChat();
         var participantPhoneList = chat.getParticipants().stream().map(User::getPhone)
                 .filter(phone -> !phone.equals(userPhone)).toList();

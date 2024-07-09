@@ -14,6 +14,7 @@ import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
 import ru.salfa.messenger.service.ChatService;
+import ru.salfa.messenger.utils.validations.ValidationUtil;
 
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +48,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) {
         try {
             var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
+            ValidationUtil.validate(msg);
             msg.handler(chatService, listeners,
                     (Objects.requireNonNull(session.getPrincipal())).getName());
         } catch (Exception e) {
