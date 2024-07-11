@@ -31,7 +31,7 @@ public class RabbitConfig {
 
     @Bean
     public MessageListenerAdapter listenerAdapter(ChatMessageListener receiver) {
-        return new MessageListenerAdapter(receiver, "receiveMessage");
+        return new MessageListenerAdapter(receiver, "onMessage");
     }
 }
 

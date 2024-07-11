@@ -2,6 +2,8 @@ package ru.salfa.messenger.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
@@ -35,6 +37,7 @@ import static ru.salfa.messenger.utils.SimpleObjectMapper.getObjectMapper;
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
+    private static final Logger log = LoggerFactory.getLogger(ChatServiceImpl.class);
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
@@ -86,17 +89,19 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
 
         User sender = getUserByPhone(senderPhone);
-
-        var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
-        attachmentsRepository.saveAll(attachmentsList);
-
         Messages msg = new Messages();
         msg.setMessage(message);
         msg.setChatId(chat);
         msg.setSenderId(sender);
-        for (var att : attachmentsList) {
-            msg.addAttachments(att);
+
+        if (attachments != null && !attachments.isEmpty()) {
+            var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
+            attachmentsRepository.saveAll(attachmentsList);
+            for (var att : attachmentsList) {
+                msg.addAttachments(att);
+            }
         }
+
         messageRepository.save(msg);
         return messageMapper.toMessageDto(msg);
     }

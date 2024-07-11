@@ -1,6 +1,7 @@
 package ru.salfa.messenger.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
@@ -31,8 +32,10 @@ import java.util.Map;
 })
 public abstract class MessageOutUser {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public String phoneNumber;
     private String action;
 
     @JsonIgnore
-    public abstract void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) ;
+    public abstract void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone);
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ChatService {
+
     @Transactional(readOnly = true)
     List<ChatsDto> getListChatDtoByUserPhone(String phone);
 
