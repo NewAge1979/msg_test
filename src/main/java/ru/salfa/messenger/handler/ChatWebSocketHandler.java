@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import ru.salfa.messenger.config.RabbitConfig;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
@@ -29,6 +31,7 @@ import static ru.salfa.messenger.utils.SimpleObjectMapper.getObjectMapper;
 @Slf4j
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
+    private final RabbitTemplate rabbitTemplate;
     private final Map<String, WebSocketSession> listeners = new ConcurrentHashMap<>();
 
     @Override
@@ -50,6 +53,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         try {
             var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
             ValidationUtil.validate(msg);
+            rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_NAME, msg);
             msg.handler(chatService, listeners,
                     (Objects.requireNonNull(session.getPrincipal())).getName());
         } catch (Exception exception) {
