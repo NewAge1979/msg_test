@@ -1,6 +1,5 @@
 package ru.salfa.messenger.handler;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -50,30 +49,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     @SneakyThrows
     public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) {
-        try {
-            var phoneNumber = (Objects.requireNonNull(session.getPrincipal())).getName();
-            MessageProperties messageProperties = MessagePropertiesBuilder.newInstance()
-                    .setContentType(MessageProperties.CONTENT_TYPE_JSON)
-                    .setHeader("userPhoneNumber", phoneNumber)
-                    .build();
-            Message rabbitMessage = MessageBuilder.withBody(message.getPayload().getBytes())
-                    .andProperties(messageProperties)
-                    .build();
+        var phoneNumber = (Objects.requireNonNull(session.getPrincipal())).getName();
+        MessageProperties messageProperties = MessagePropertiesBuilder.newInstance()
+                .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                .setHeader("userPhoneNumber", phoneNumber)
+                .build();
+        Message rabbitMessage = MessageBuilder.withBody(message.getPayload().getBytes())
+                .andProperties(messageProperties)
+                .build();
 
-            rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_NAME, rabbitMessage);
-        } catch (Exception exception) {
-            var msg = new ExceptionPayload();
-            msg.setRequest(message.getPayload());
-            log.error(exception.getMessage(), exception);
+        rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_NAME, rabbitMessage);
 
-            if (exception instanceof UnrecognizedPropertyException) {
-                msg.setException("An error occurred during message processing. Check messages field.");
-            } else {
-                msg.setException(exception.getMessage());
-            }
-
-            chatService.sendMessage(session, msg);
-        }
     }
 
     @Override

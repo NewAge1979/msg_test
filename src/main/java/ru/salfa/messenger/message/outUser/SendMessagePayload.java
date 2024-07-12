@@ -43,7 +43,6 @@ public class SendMessagePayload extends MessageOutUser {
     @Override
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
         log.info("Send message to user {}", userPhone);
-        log.info(message);
         var chatIsCreated = service.getOrCreateChat(Long.parseLong(participantId), userPhone);
         var chat = chatIsCreated.getChat();
         var participantPhoneList = chat.getParticipants().stream().map(User::getPhone)
