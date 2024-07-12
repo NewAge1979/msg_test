@@ -1,0 +1,51 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: Messenger
+  profiles:
+    active: ${MSG_PROFILE:develop}
+  #Database
+  datasource:
+    url: ${MSG_DB_URL:jdbc:postgresql://localhost:5432/messenger_db}
+    username: ${MSG_DB_USERNAME:messenger_admin}
+    password: ${MSG_DB_PASSWORD:R0t4@dm1n}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+#Logging
+logging:
+  level:
+    root: error
+    web: error
+    sql: error
+    ru:
+      salfa:
+        messenger: error
+#OTP
+otp:
+  length: 5
+  expiration: 300000
+  number-of-attempts: 3
+  interval-for-blocking: 1800000
+  duration-of-blocking: 86400000
+  send-sms: ${MSG_SEND_SMS:false}
+#JWT
+jwt:
+  access-token-secret: daf66e01593f61a15b857cf433aae03a005812b31234e149036bcc8dee755dbb11
+  access-token-expiration: 300000
+  refresh-token-secret: daf66e01593f61a15b857cf433aae03a005812b31234e149036bcc8dee755dbb12
+  refresh-token-expiration: 2592000000
+#SMS
+sms:
+  username: max.khrapatiy@gmail.com
+  password: gXGnCgVP0dTUOoBwGRV3guO1xgn_7_kO
+  title: SMSAero
+#Websocket
+websocket:
+  endpoint: /api/v1/ws/chat

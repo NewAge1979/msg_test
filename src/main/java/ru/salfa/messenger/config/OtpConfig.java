@@ -13,4 +13,5 @@ public class OtpConfig {
     private Integer numberOfAttempts;
     private Long intervalForBlocking;
     private Long durationOfBlocking;
+    private boolean sendSms;
 }
