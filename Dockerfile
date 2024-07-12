@@ -1,20 +1,20 @@
-# Используем официальный образ OpenJDK в качестве базового образа
-FROM openjdk:17-jdk-slim
+FROM maven:latest AS builder
+WORKDIR /application
+COPY . .
+RUN --mount=type=cache,target=/root/.m2  mvn clean install -Dmaven.test.skip
 
-# Устанавливаем рабочую директорию в контейнере
-WORKDIR /app
+FROM bellsoft/liberica-openjre-alpine:17 AS layers
+WORKDIR /application
+COPY --from=builder /application/target/*.jar app.jar
+RUN java -Djarmode=layertools -jar app.jar extract
 
-# Копируем файл с зависимостями приложения
-COPY target/*.jar app.jar
+FROM bellsoft/liberica-openjre-alpine:17
+VOLUME /tmp
+RUN adduser -S messenger-user
+USER messenger-user
+COPY --from=layers /application/dependencies/ ./
+COPY --from=layers /application/spring-boot-loader/ ./
+COPY --from=layers /application/snapshot-dependencies/ ./
+COPY --from=layers /application/application/ ./
 
-# Определяем переменные окружения для подключения к базе данных
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5434/salfa_msg
-ENV SPRING_DATASOURCE_USERNAME=sandbox
-ENV SPRING_DATASOURCE_PASSWORD=sandbox
-
-
-# Команда для запуска приложения
-ENTRYPOINT ["sh", "-c", "java -jar /app/app.jar"]
-
-# Указываем порт, который будет слушать приложение
-EXPOSE 8080
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
