@@ -60,7 +60,13 @@ public class ChatMessageListener implements ChannelAwareMessageListener {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             log.error("Error processing message", e);
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
+            var exceptionPayload = new ExceptionPayload();
+            exceptionPayload.setRequest(new String(messageBody, StandardCharsets.UTF_8));
+            exceptionPayload.setException(e.getMessage());
+
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            chatService.sendMessage(listeners.getListeners().get(userPhoneNumber), exceptionPayload);
+
         }
     }
 }

@@ -8,4 +8,13 @@
       </database-info>
     </database-infos>
   </component>
+  <component name="AmplicodePersistenceUnitSettings">
+    <persistence-units>
+      <persistence-unit moduleName="messenger" name="Default">
+        <packages>
+          <package value="ru.salfa.messenger" />
+        </packages>
+      </persistence-unit>
+    </persistence-units>
+  </component>
 </project>
