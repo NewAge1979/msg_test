@@ -3,7 +3,7 @@ services:
     image: postgres:16.3-alpine
     restart: always
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure:/docker-entrypoint-initdb.d:ro
@@ -21,11 +21,11 @@ services:
     image: dpage/pgadmin4:8.9
     restart: always
     ports:
-      - "5050:80"
+      - "5052:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      #- ./docker/pgadmin/servers.json:/pgadmin4/servers.json
-      #- ./docker/pgadmin/pgpass:/pgadmin4/pgpass
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./docker/pgadmin/pgpass:/pgadmin4/pgpass
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
@@ -39,13 +39,13 @@ services:
       retries: 5
     depends_on:
       - postgres
-    #entrypoint: /bin/sh -c "chmod 600 /pgadmin4/pgpass; /entrypoint.sh;"
+    entrypoint: /bin/sh -c "chmod 600 /pgadmin4/pgpass; /entrypoint.sh;"
   messenger:
-    image: messenger:latest
+    image: messenger:dev
     build: .
     restart: always
     ports:
-      - "8081:8080"
+      - "8083:8080"
     depends_on:
       - postgres
     environment:
