@@ -14,7 +14,7 @@ import ru.salfa.messenger.exception.SmsSenderException;
 @Component
 @RequiredArgsConstructor
 public class SmsSenderImpl implements SmsSender {
-    private SmsConfig smsConfig;
+    private final SmsConfig smsConfig;
 
     @Override
     public void sendSms(String phone, String message) throws SmsSenderException {
