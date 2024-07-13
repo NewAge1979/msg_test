@@ -86,17 +86,19 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
 
         User sender = getUserByPhone(senderPhone);
-
-        var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
-        attachmentsRepository.saveAll(attachmentsList);
-
         Messages msg = new Messages();
         msg.setMessage(message);
         msg.setChatId(chat);
         msg.setSenderId(sender);
-        for (var att : attachmentsList) {
-            msg.addAttachments(att);
+
+        if (attachments != null && !attachments.isEmpty()) {
+            var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
+            attachmentsRepository.saveAll(attachmentsList);
+            for (var att : attachmentsList) {
+                msg.addAttachments(att);
+            }
         }
+
         messageRepository.save(msg);
         return messageMapper.toMessageDto(msg);
     }
@@ -160,9 +162,14 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public boolean blockedContact(Long userId, String phone) {
-        var user = userRepository.findByIdAndIsDeleted(userId, false)
+        var blockedUser = userRepository.findByIdAndIsDeleted(userId, false)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        getUserByPhone(phone).blockContact(user);
+        var user = getUserByPhone(phone);
+        if (user.isBlockedContact(blockedUser)) {
+            user.unblockContact(blockedUser);
+            return true;
+        }
+        user.blockContact(blockedUser);
         return true;
     }
 

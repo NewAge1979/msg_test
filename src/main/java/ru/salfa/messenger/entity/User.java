@@ -119,4 +119,12 @@ public class User implements UserDetails {
     public void  blockContact(User user) {
         blockedContacts.add(user);
     }
+
+    public boolean isBlockedContact(User user) {
+        return blockedContacts.contains(user);
+    }
+
+    public void unblockContact(User user) {
+        blockedContacts.remove(user);
+    }
 }

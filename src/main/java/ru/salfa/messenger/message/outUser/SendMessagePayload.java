@@ -2,7 +2,10 @@ package ru.salfa.messenger.message.outUser;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.AttachmentsDto;
 import ru.salfa.messenger.entity.User;
@@ -12,17 +15,24 @@ import ru.salfa.messenger.message.toUser.ChatMessagePayload;
 import ru.salfa.messenger.message.toUser.SuccessActionPayload;
 import ru.salfa.messenger.service.ChatService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 @Setter
 @JsonTypeName(SendMessagePayload.ACTION)
+@Slf4j
 public class SendMessagePayload extends MessageOutUser {
     public static final String ACTION = "send_message";
 
+    @NotBlank(message = "Message cannot be null")
     private String message;
+
+    @NotBlank(message = "Participant ID cannot be null")
+    @Pattern(regexp = "^[1-9]\\d*$", message = "Field must be a number greater than 0")
     @JsonProperty("participant_id")
-    private Long participantId;
+    private String participantId;
+
     private List<AttachmentsDto> attachments;
 
     @Override
@@ -30,11 +40,10 @@ public class SendMessagePayload extends MessageOutUser {
         return ACTION;
     }
 
-    @SneakyThrows
     @Override
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
-
-        var chatIsCreated = service.getOrCreateChat(participantId, userPhone);
+        log.info("Send message to user {}", userPhone);
+        var chatIsCreated = service.getOrCreateChat(Long.parseLong(participantId), userPhone);
         var chat = chatIsCreated.getChat();
         var participantPhoneList = chat.getParticipants().stream().map(User::getPhone)
                 .filter(phone -> !phone.equals(userPhone)).toList();
@@ -48,7 +57,13 @@ public class SendMessagePayload extends MessageOutUser {
                     .getId());
             for (var participantPhone : participantPhoneList) {
                 if (listeners.containsKey(participantPhone)) {
-                    service.sendMessage(listeners.get(participantPhone), creatChatPayload);
+                    try {
+                        service.sendMessage(listeners.get(participantPhone), creatChatPayload);
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                        return;
+                    }
+
                 }
             }
 
@@ -56,20 +71,32 @@ public class SendMessagePayload extends MessageOutUser {
 
         var successPayload = new SuccessActionPayload();
         var messagePayload = new ChatMessagePayload();
-
-        var msgDto = service.createAndSaveMsg(chat.getId(), userPhone, message, attachments);
-        messagePayload.setMessages(msgDto);
-        messagePayload.setChatId(chat.getId());
+        try {
+            var msgDto = service.createAndSaveMsg(chat.getId(), userPhone, message, attachments);
+            messagePayload.setMessages(msgDto);
+            messagePayload.setChatId(chat.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return;
+        }
 
 
         for (var participantPhone : participantPhoneList) {
             if (listeners.containsKey(participantPhone)) {
-                service.sendMessage(listeners.get(participantPhone), messagePayload);
+                try {
+                    service.sendMessage(listeners.get(participantPhone), messagePayload);
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
         successPayload.setMessage("Message successfully");
         successPayload.setChatId(chat.getId());
         successPayload.setCreated(chatIsCreated.isCreated());
-        service.sendMessage(listeners.get(userPhone), successPayload);
+        try {
+            service.sendMessage(listeners.get(userPhone), successPayload);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

@@ -67,6 +67,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @SneakyThrows
     public void handleTransportError(@NonNull WebSocketSession session, Throwable exception) {
         var msg = new ExceptionPayload();
+        log.error(exception.getMessage(), exception);
         msg.setException(exception.getMessage());
         chatService.sendMessage(session, msg);
     }
