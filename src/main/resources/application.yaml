@@ -43,9 +43,9 @@ jwt:
   refresh-token-expiration: 2592000000
 #SMS
 sms:
-  username: max.khrapatiy@gmail.com
-  password: gXGnCgVP0dTUOoBwGRV3guO1xgn_7_kO
-  title: SMSAero
+  username: ${MSG_SMS_USER:max.khrapatiy@gmail.com}
+  password: ${MSG_SMS_PWD:gXGnCgVP0dTUOoBwGRV3guO1xgn_7_kO}
+  title: ${MSG_SMS_TITLE:SMSAero}
 #Websocket
 websocket:
   endpoint: /api/v1/ws/chat
