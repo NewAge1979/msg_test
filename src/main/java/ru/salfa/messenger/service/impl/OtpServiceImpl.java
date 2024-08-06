@@ -36,7 +36,9 @@ public class OtpServiceImpl implements OtpService {
         log.debug("sendOTPCode: {}", user.toString());
         String otpCode = generateOTPCode(user);
 
-        smsSender.sendSms(user.getPhone(), otpCode);
+        if (otpConfig.isSendSms()) {
+            smsSender.sendSms(user.getPhone(), otpCode);
+        }
         log.debug("Send OTP code: {} on phone: {}", otpCode, user.getPhone());
     }
 
@@ -48,6 +50,9 @@ public class OtpServiceImpl implements OtpService {
         }
         if (countOTPCodeError(user.getId()) >= otpConfig.getNumberOfAttempts()) {
             addLogAccessEvent(user, 2);
+        }
+        if (!otpConfig.isSendSms() && otpCode.equals("0".repeat(otpConfig.getLength()))) {
+            flag = true;
         }
         return flag;
     }
@@ -76,6 +81,9 @@ public class OtpServiceImpl implements OtpService {
 
     private String generateOTPCode(User user) {
         String otpCode = RandomStringUtils.randomNumeric(otpConfig.getLength());
+        if (!otpConfig.isSendSms()) {
+            otpCode = "0".repeat(otpConfig.getLength());
+        }
         log.debug("OTP code: {}", otpCode);
         otpCodeRepository.save(
                 OtpCode.builder()

@@ -1,9 +1,10 @@
 package ru.salfa.messenger.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.salfa.messenger.dto.request.GetOtpCodeRequest;
 import ru.salfa.messenger.dto.request.SignInRequest;
-import ru.salfa.messenger.dto.request.SignUpRequest;
 import ru.salfa.messenger.dto.response.SignInResponse;
 import ru.salfa.messenger.dto.response.TokensResponse;
 import ru.salfa.messenger.security.AuthenticationService;
@@ -24,14 +24,14 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/getOTPCode")
-    ResponseEntity<Void> getOtpCode(@RequestBody GetOtpCodeRequest request) {
+    ResponseEntity<Void> getOtpCode(@Valid @RequestBody GetOtpCodeRequest request) {
         log.debug("Endpoint: /api/v1/auth/getOTPCode. Method: POST.");
         authenticationService.getOtpCode(request);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signIn")
-    ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest request) {
+    ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request) {
         log.debug("Endpoint: /api/v1/auth/signIn. Method: POST.");
         return ResponseEntity.ok(authenticationService.signIn(request));
     }
@@ -43,9 +43,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signOut")
-    ResponseEntity<Void> signOut() {
+    ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response) {
         log.debug("Endpoint: /api/v1/auth/signOut. Method: POST.");
-        authenticationService.signOut();
+        authenticationService.signOut(request, response);
         return ResponseEntity.ok().build();
     }
 }

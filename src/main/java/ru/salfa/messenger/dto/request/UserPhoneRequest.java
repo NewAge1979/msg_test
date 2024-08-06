@@ -13,10 +13,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetOtpCodeRequest {
-        @NotEmpty(message = "The phone number cannot be empty.")
-        @NotNull(message = "The phone number cannot be null.")
-        @Size(min = 10, max = 10, message = "The phone number must contain 10 digits.")
-        @Pattern(regexp = "^9\\d{9}$", message = "Phone number is not correct.")
-        String phone;
+public class UserPhoneRequest {
+    @NotEmpty(message = "The phone number cannot be empty.")
+    @NotNull(message = "The phone number cannot be null.")
+    @Size(min = 10, max = 10, message = "The phone number must contain 10 digits.")
+    @Pattern(regexp = "^9\\d{9}$", message = "Phone number is not correct.")
+    String phone;
 }

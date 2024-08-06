@@ -1,11 +1,15 @@
 package ru.salfa.messenger.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import ru.salfa.messenger.dto.request.GetOtpCodeRequest;
 import ru.salfa.messenger.dto.request.SignInRequest;
@@ -31,12 +35,12 @@ public class AuthenticationService {
     private final NewUserRepository newUserRepository;
 
     public void getOtpCode(GetOtpCodeRequest request) {
-        if (!userRepository.existsByPhone(request.phone())) {
+        if (!userRepository.existsByPhone(request.getPhone())) {
             userRepository.save(
                     User.builder()
-                            .phone(request.phone())
+                            .phone(request.getPhone())
                             .firstName("")
-                            .nickname("NewUser#" + request.phone())
+                            .nickname("NewUser#" + request.getPhone())
                             .created(now())
                             .isDeleted(false)
                             .phoneIsVerified(false)
@@ -44,7 +48,7 @@ public class AuthenticationService {
                             .build()
             );
         }
-        User user = userRepository.findByPhoneAndIsDeleted(request.phone(), false).orElseThrow(
+        User user = userRepository.findByPhoneAndIsDeleted(request.getPhone(), false).orElseThrow(
                 () -> new UserNotFoundException("User not found.")
         );
         otpService.sendOTPCode(user);
@@ -74,7 +78,11 @@ public class AuthenticationService {
         return new TokensResponse(jwtAccessToken, jwtRefreshToken);
     }
 
-    public void signOut() {
-
+    public void signOut(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            jwtService.removeTokens(auth.getName());
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
     }
 }

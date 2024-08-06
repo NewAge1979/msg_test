@@ -13,6 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import ru.salfa.messenger.exception.UserTokenException;
+import ru.salfa.messenger.exception.UserUnauthorizedException;
 
 import java.io.IOException;
 
@@ -27,34 +30,65 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailServiceImpl userDetailService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain
-    ) throws IOException, ServletException {//}, UserTokenException {
+    ) throws IOException, ServletException {
         var authorization = request.getHeader(AUTHORIZATION);
         log.debug("Authorization: {}", authorization);
         if (StringUtils.isNotEmpty(authorization) && StringUtils.startsWith(authorization, BEARER_PREFIX)) {
-            String phone;
+            String phone = null;
             if (request.getRequestURI().contains("refreshTokens")) {
-                phone = jwtService.getPhoneFromRefreshToken(authorization);
+                log.debug("RToken 1");
+                try {
+                    if (jwtService.refreshTokenExistsInCache(authorization)) {
+                        phone = jwtService.getPhoneFromRefreshToken(authorization);
+                        addUserToSecurityContext(phone);
+                        filterChain.doFilter(request, response);
+                    } else {
+                        sendException(request, response, new UserUnauthorizedException("User not authentication."));
+                    }
+                } catch (UserTokenException e) {
+                    sendException(request, response, new UserUnauthorizedException("User not authentication."));
+                }
             } else {
-                phone = jwtService.getPhoneFromAccessToken(authorization);
-            }
-            if (StringUtils.isNotEmpty(phone) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailService.loadUserByUsername(phone);
-                if (jwtService.accessTokenIsValid(authorization, userDetails)) {
-                    SecurityContext context = SecurityContextHolder.createEmptyContext();
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, "", userDetails.getAuthorities()
-                    );
-                    context.setAuthentication(authenticationToken);
-                    SecurityContextHolder.setContext(context);
+                try {
+                    if (jwtService.accessTokenExistsInCache(authorization)) {
+                        phone = jwtService.getPhoneFromAccessToken(authorization);
+                        addUserToSecurityContext(phone);
+                        filterChain.doFilter(request, response);
+                    } else {
+                        if (jwtService.anotherAccessTokenExistsInCache(authorization)) {
+                            sendException(request, response, new UserUnauthorizedException("Token error: Invalid token."));
+                        } else {
+                            sendException(request, response, new UserUnauthorizedException("User not authentication."));
+                        }
+                    }
+                } catch (UserTokenException e) {
+                    sendException(request, response, e);
                 }
             }
-            filterChain.doFilter(request, response);
         } else {
+            log.debug("Unauthorized request!");
             filterChain.doFilter(request, response);
         }
+    }
+
+    private void addUserToSecurityContext(String phone) {
+        if (StringUtils.isNotEmpty(phone) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailService.loadUserByUsername(phone);
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, "", userDetails.getAuthorities()
+            );
+            context.setAuthentication(authToken);
+            SecurityContextHolder.setContext(context);
+        }
+    }
+
+    private void sendException(HttpServletRequest request, HttpServletResponse response, Exception e) {
+        handlerExceptionResolver.resolveException(request, response, null, e);
     }
 }
