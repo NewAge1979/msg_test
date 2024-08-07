@@ -5,12 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.MessagePropertiesBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -22,10 +22,7 @@ import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
 import ru.salfa.messenger.service.ChatService;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
@@ -33,10 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
-    @Value("${websocket.textMessageSizeLimit}")
-    private int textMessageSizeLimit;
     private final RabbitTemplate rabbitTemplate;
     private final WebSocketListenersHolder listeners;
+    @Value("${websocket.textMessageSizeLimit}")
+    private int textMessageSizeLimit;
 
     @Override
     @SneakyThrows
