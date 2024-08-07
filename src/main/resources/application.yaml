@@ -58,6 +58,6 @@ sms:
 #Websocket
 websocket:
   endpoint: /api/v1/ws/chat
-  textMessageSizeLimit: 10
+  textMessageSizeLimit: 104857600
 
 
