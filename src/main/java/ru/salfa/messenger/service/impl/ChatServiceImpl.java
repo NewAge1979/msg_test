@@ -1,5 +1,6 @@
 package ru.salfa.messenger.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -83,9 +84,11 @@ public class ChatServiceImpl implements ChatService {
         return true;
     }
 
+
+
     @Override
     @Transactional
-    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) {
+    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<Document> documents) throws JsonProcessingException {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
 

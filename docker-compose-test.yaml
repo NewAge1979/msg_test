@@ -68,15 +68,16 @@ services:
     environment:
       - MSG_DB_URL=jdbc:postgresql://postgres/messenger_db
       - MONGO_DB_URL=mongodb://localhost:27017/mongo_test
+      - SPRING_RABBITMQ_HOST = rabbitmq
+      - SPRING_RABBITMQ_PORT = 5672
+      - SPRING_RABBITMQ_USERNAME = user
+      - SPRING_RABBITMQ_PASSWORD = password
   mongodb:
     image: mongo:latest
     ports:
       - "27017:27017"
     environment:
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: user
-      SPRING_RABBITMQ_PASSWORD: password
+
 volumes:
   postgres_data:
   pgadmin_data:
