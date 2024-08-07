@@ -1,6 +1,6 @@
 package ru.salfa.messenger.service;
 
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 
 public interface OtpService {
     void sendOTPCode(User user);

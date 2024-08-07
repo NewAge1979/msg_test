@@ -6,7 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.exception.UserBlockedException;
 import ru.salfa.messenger.exception.UserNotFoundException;
 import ru.salfa.messenger.exception.UserOtpException;

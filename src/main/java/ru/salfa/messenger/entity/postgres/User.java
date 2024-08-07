@@ -1,4 +1,4 @@
-package ru.salfa.messenger.entity;
+package ru.salfa.messenger.entity.postgres;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

@@ -1,10 +1,8 @@
-package ru.salfa.messenger.entity;
+package ru.salfa.messenger.entity.postgres;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -16,18 +14,13 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "otp_codes")
-public class OtpCode {
+@Table(name = "log_access")
+public class LogAccess {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "otp_codes_id_gen")
-    @SequenceGenerator(name = "otp_codes_id_gen", sequenceName = "otp_codes_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "log_access_id_gen")
+    @SequenceGenerator(name = "log_access_id_gen", sequenceName = "log_access_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Long id;
-
-    @Size(max = 6)
-    @NotNull
-    @Column(name = "otp_code", nullable = false, length = 6)
-    private String otpCode;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -36,12 +29,14 @@ public class OtpCode {
     private User user;
 
     @NotNull
+    @Column(name = "log_type", nullable = false)
+    private Integer logType;
+
+    @NotNull
     @Column(name = "created", nullable = false)
     private OffsetDateTime created;
 
-    @Column(name = "expires")
-    private OffsetDateTime expires;
-
-    @Column(name = "is_expired")
-    private Boolean isExpired;
+    @NotNull
+    @Column(name = "expired", nullable = false)
+    private OffsetDateTime expired;
 }

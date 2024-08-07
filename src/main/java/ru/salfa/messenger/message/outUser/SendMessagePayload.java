@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
-import ru.salfa.messenger.dto.model.AttachmentsDto;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.dto.model.Document;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatCreatedPayload;
 import ru.salfa.messenger.message.toUser.ChatMessagePayload;
@@ -33,7 +33,7 @@ public class SendMessagePayload extends MessageOutUser {
     @JsonProperty("participant_id")
     private String participantId;
 
-    private List<AttachmentsDto> attachments;
+    private List<Document> documents;
 
     @Override
     public String getAction() {
@@ -72,7 +72,7 @@ public class SendMessagePayload extends MessageOutUser {
         var successPayload = new SuccessActionPayload();
         var messagePayload = new ChatMessagePayload();
         try {
-            var msgDto = service.createAndSaveMsg(chat.getId(), userPhone, message, attachments);
+            var msgDto = service.createAndSaveMsg(chat.getId(), userPhone, message, documents);
             messagePayload.setMessages(msgDto);
             messagePayload.setChatId(chat.getId());
         } catch (Exception e) {

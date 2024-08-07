@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.salfa.messenger.config.JwtConfig;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.exception.UserTokenException;
 
 import javax.crypto.SecretKey;

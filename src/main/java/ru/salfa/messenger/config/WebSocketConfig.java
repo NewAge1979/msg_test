@@ -11,10 +11,9 @@ import ru.salfa.messenger.handler.ChatWebSocketHandler;
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
+    private final ChatWebSocketHandler chatWebSocketHandler;
     @Value("${websocket.endpoint}")
     private String endpoint;
-
-    private final ChatWebSocketHandler chatWebSocketHandler;
 
     public WebSocketConfig(ChatWebSocketHandler chatWebSocketHandler) {
         this.chatWebSocketHandler = chatWebSocketHandler;

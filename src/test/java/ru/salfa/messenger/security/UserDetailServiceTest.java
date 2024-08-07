@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import ru.salfa.messenger.repository.UserRepository;
 

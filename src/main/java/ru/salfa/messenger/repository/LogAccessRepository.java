@@ -2,7 +2,7 @@ package ru.salfa.messenger.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.salfa.messenger.entity.LogAccess;
+import ru.salfa.messenger.entity.postgres.LogAccess;
 
 import java.time.OffsetDateTime;
 

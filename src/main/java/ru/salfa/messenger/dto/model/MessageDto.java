@@ -16,5 +16,5 @@ public class MessageDto {
     private String message;
     private Long sender;
     private String created;
-    private List<AttachmentsDto> attachments;
+    private List<Document> attachments;
 }

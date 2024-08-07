@@ -1,8 +1,8 @@
 package ru.salfa.messenger.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.salfa.messenger.entity.OtpCode;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.OtpCode;
+import ru.salfa.messenger.entity.postgres.User;
 
 import java.util.Optional;
 

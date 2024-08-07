@@ -1,8 +1,8 @@
 package ru.salfa.messenger.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.salfa.messenger.entity.Chat;
-import ru.salfa.messenger.entity.Messages;
+import ru.salfa.messenger.entity.postgres.Chat;
+import ru.salfa.messenger.entity.postgres.Messages;
 
 import java.util.List;
 

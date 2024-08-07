@@ -10,4 +10,5 @@ public class SimpleObjectMapper {
     public static ObjectMapper getObjectMapper(){
         return INSTANCE;
     }
+
 }

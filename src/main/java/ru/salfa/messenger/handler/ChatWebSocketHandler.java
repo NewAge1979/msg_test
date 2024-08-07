@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,6 +16,7 @@ import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
 import ru.salfa.messenger.service.ChatService;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,10 +30,14 @@ import static ru.salfa.messenger.utils.SimpleObjectMapper.getObjectMapper;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
     private final Map<String, WebSocketSession> listeners = new ConcurrentHashMap<>();
+    @Value("${websocket.textMessageSizeLimit}")
+    private int textMessageSizeLimit;
 
     @Override
     @SneakyThrows
     public void afterConnectionEstablished(WebSocketSession session) {
+        session.setTextMessageSizeLimit(textMessageSizeLimit);
+        super.afterConnectionEstablished(session);
         var chatListPayload = new ChatListPayload();
         var phone = (Objects.requireNonNull(session.getPrincipal())).getName();
         chatListPayload.setChats(chatService.getListChatDtoByUserPhone(phone));
@@ -43,13 +49,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    @SneakyThrows
-    public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) {
+    public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) throws IOException {
         try {
             var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
             msg.handler(chatService, listeners,
                     (Objects.requireNonNull(session.getPrincipal())).getName());
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             var msg = new ExceptionPayload();
             msg.setRequest(message.getPayload());
             msg.setException(e.getMessage());

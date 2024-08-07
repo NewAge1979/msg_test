@@ -4,19 +4,19 @@ CREATE SEQUENCE IF NOT EXISTS otp_codes_id_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS users_id_seq START WITH 1 INCREMENT BY 1;
 
-CREATE TABLE chats_participants
+CREATE TABLE IF NOT EXISTS chats_participants
 (
     chats_id        BIGINT NOT NULL,
     participants_id BIGINT NOT NULL
 );
 
-CREATE TABLE messages_user_delete_message
+CREATE TABLE IF NOT EXISTS messages_user_delete_message
 (
     messages_id            BIGINT NOT NULL,
     user_delete_message_id BIGINT NOT NULL
 );
 
-CREATE TABLE users_blocked_contacts
+CREATE TABLE IF NOT EXISTS users_blocked_contacts
 (
     user_id             BIGINT NOT NULL,
     blocked_contacts_id BIGINT NOT NULL

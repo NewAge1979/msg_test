@@ -4,7 +4,7 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 import ru.salfa.messenger.dto.model.UserDto;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 
 import java.util.List;
 
