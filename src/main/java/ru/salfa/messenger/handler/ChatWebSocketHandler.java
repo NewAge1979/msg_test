@@ -67,18 +67,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_NAME, rabbitMessage);
 
-    public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) throws IOException {
-        try {
-            var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);
-            msg.handler(chatService, listeners,
-                    (Objects.requireNonNull(session.getPrincipal())).getName());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            var msg = new ExceptionPayload();
-            msg.setRequest(message.getPayload());
-            msg.setException(e.getMessage());
-            chatService.sendMessage(session, msg);
-        }
     }
 
     @Override
