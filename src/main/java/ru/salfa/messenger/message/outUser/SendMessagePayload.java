@@ -44,11 +44,14 @@ public class SendMessagePayload extends MessageOutUser {
     @Override
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
         log.info("Send message to user {}", userPhone);
+
         var chatIsCreated = service.getOrCreateChat(Long.parseLong(participantId), userPhone);
         var chat = chatIsCreated.getChat();
         var participantPhoneList = chat.getParticipants().stream().map(User::getPhone)
                 .filter(phone -> !phone.equals(userPhone)).toList();
-
+        if(participantPhoneList.isEmpty()) {
+            throw new RuntimeException("Нельзя отправлять сообщения самому себе");
+        }
         if (chatIsCreated.isCreated()) {
             var creatChatPayload = new ChatCreatedPayload();
             creatChatPayload.setChatId(chat.getId());

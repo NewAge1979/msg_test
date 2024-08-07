@@ -7,7 +7,7 @@ spring:
     active: ${MSG_PROFILE:develop}
   #Database
   datasource:
-    url: ${MSG_DB_URL:jdbc:postgresql://localhost:5434/messenger_db_dev}
+    url: ${MSG_DB_URL:jdbc:postgresql://localhost:5434/messenger_db}
     username: ${MSG_DB_USERNAME:messenger_admin}
     password: ${MSG_DB_PASSWORD:R0t4@dm1n}
   jpa:
@@ -21,9 +21,8 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_DB_URL:mongodb://admin:password@localhost:27017/filedb?authSource=admin}
-
   rabbitmq:
-    host : rabbitmq
+    host : localhost
     port : 5672
     username : user
     password : password

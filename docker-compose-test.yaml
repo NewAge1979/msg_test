@@ -61,17 +61,17 @@ services:
     restart: always
     ports:
       - "8082:8080"
-    depends_on:
-      - postgres
-      - mongodb
-      - rabbitmq_msg_test
     environment:
       - MSG_DB_URL=jdbc:postgresql://postgres/messenger_db
-      - MONGO_DB_URL=mongodb://localhost:27017/mongo_test
+      - MONGO_DB_URL=mongodb://admin:password@mongodb/filedb?authSource=admin
       - SPRING_RABBITMQ_HOST=rabbitmq_msg_test
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=user
       - SPRING_RABBITMQ_PASSWORD=password
+    depends_on:
+      - postgres
+      - mongodb
+      - rabbitmq_msg_test
 
   mongodb:
     image: mongo:latest
