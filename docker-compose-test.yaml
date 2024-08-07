@@ -76,7 +76,16 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
-    environment:
+    mongodb:
+      image: mongo:latest
+      ports:
+        - "27017:27017"
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=admin
+        - MONGO_INITDB_ROOT_PASSWORD=password
+        - MONGO_INITDB_DATABASE=filedb
+      volumes:
+        - mongo-data:/data/db
 
 volumes:
   postgres_data:
