@@ -40,7 +40,7 @@ public class SendMessagePayload extends MessageOutUser {
         return ACTION;
     }
 
-    @SneakyThrows
+
     @Override
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
         log.info("Send message to user {}", userPhone);

@@ -46,7 +46,6 @@ public class ChatServiceImpl implements ChatService {
     private final ObjectMapper jsonMapper = getObjectMapper();
     private final ChatMapper chatMapper;
     private final MessageMapper messageMapper;
-    private final AttachmentsMapper attachmentsMapper;
     private final UserMapper userMapper;
     private final FileService fileService;
 

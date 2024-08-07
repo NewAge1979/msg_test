@@ -71,7 +71,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
-        listeners.remove((Objects.requireNonNull(session.getPrincipal())).getName());
+        listeners.removeListener((Objects.requireNonNull(session.getPrincipal())).getName());
         log.info(String.format("Session disconnected. Total connected listeners: %s", listeners.size()));
     }
 
