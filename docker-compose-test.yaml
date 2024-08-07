@@ -64,6 +64,7 @@ services:
     depends_on:
       - postgres
       - mongodb
+      - rabbitmq
     environment:
       - MSG_DB_URL=jdbc:postgresql://postgres/messenger_db
       - MONGO_DB_URL=mongodb://localhost:27017/mongo_test
@@ -71,21 +72,11 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: user
       SPRING_RABBITMQ_PASSWORD: password
-      MSG_DB_URL: jdbc:postgresql://postgres/messenger_db
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-      - MONGO_INITDB_DATABASE=filedb
-    volumes:
-      - mongo-data:/data/db
 volumes:
   postgres_data:
   pgadmin_data:

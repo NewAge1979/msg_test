@@ -25,6 +25,7 @@ import ru.salfa.messenger.service.ChatService;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
@@ -32,7 +33,6 @@ import java.util.Objects;
 @Slf4j
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
-    private final Map<String, WebSocketSession> listeners = new ConcurrentHashMap<>();
     @Value("${websocket.textMessageSizeLimit}")
     private int textMessageSizeLimit;
     private final RabbitTemplate rabbitTemplate;
