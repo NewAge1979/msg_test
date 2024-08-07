@@ -15,7 +15,7 @@ import ru.salfa.messenger.dto.request.GetOtpCodeRequest;
 import ru.salfa.messenger.dto.request.SignInRequest;
 import ru.salfa.messenger.dto.response.SignInResponse;
 import ru.salfa.messenger.dto.response.TokensResponse;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.exception.UserNotFoundException;
 import ru.salfa.messenger.repository.NewUserRepository;
 import ru.salfa.messenger.repository.UserRepository;

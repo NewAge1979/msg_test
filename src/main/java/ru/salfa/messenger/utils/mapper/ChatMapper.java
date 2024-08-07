@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
 import ru.salfa.messenger.dto.model.ChatsDto;
-import ru.salfa.messenger.entity.Chat;
+import ru.salfa.messenger.entity.postgres.Chat;
 import ru.salfa.messenger.utils.mapper.helper.UserMapperHelper;
 
 @Component

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.salfa.messenger.entity.Chat;
+import ru.salfa.messenger.entity.postgres.Chat;
 
 @Getter
 @Setter

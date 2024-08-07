@@ -7,14 +7,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import ru.salfa.messenger.dto.request.GetOtpCodeRequest;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.repository.OtpCodeRepository;
 import ru.salfa.messenger.repository.UserRepository;
 
 import java.time.OffsetDateTime;
-
-import static org.mockito.BDDMockito.given;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

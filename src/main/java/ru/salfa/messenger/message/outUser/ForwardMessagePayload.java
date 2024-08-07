@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.springframework.web.socket.WebSocketSession;
-import ru.salfa.messenger.dto.model.AttachmentsDto;
+import ru.salfa.messenger.dto.model.Document;
 import ru.salfa.messenger.dto.model.MessageDto;
 import ru.salfa.messenger.message.MessageOutUser;
 import ru.salfa.messenger.message.toUser.ChatCreatedPayload;
@@ -38,13 +38,13 @@ public class ForwardMessagePayload extends MessageOutUser {
     private String message;
 
     @JsonProperty("attachments_message")
-    private List<AttachmentsDto> attachmentsMessage;
+    private List<Document> attachmentsMessage;
 
     @NotBlank(message = "Forwarded message cannot be null")
     @JsonProperty("forwarded_message")
     private String forwardedMessage;
     @JsonProperty("attachments_forwarded_message")
-    private List<AttachmentsDto> attachmentsForwardedMessage;
+    private List<Document> attachmentsForwardedMessage;
 
     @NotBlank(message = "Original sender message cannot be null")
     @JsonProperty("original_sender")

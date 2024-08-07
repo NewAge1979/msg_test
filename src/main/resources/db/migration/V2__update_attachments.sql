@@ -1,0 +1,5 @@
+ALTER TABLE attachments
+    ADD filename VARCHAR(255);
+
+ALTER TABLE attachments
+    ALTER COLUMN url TYPE VARCHAR(255) USING (url::VARCHAR(255));

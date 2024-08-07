@@ -1,55 +1,42 @@
 services:
-  postgres:
-    image: postgres:16.3-alpine
-    restart: always
-    ports:
-      - "5435:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./infrastructure:/docker-entrypoint-initdb.d:ro
-    environment:
-      POSTGRES_USER: messenger_admin
-      POSTGRES_PASSWORD: R0t4@dm1n
-      POSTGRES_DB: messenger_db
-    healthcheck:
-      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
-      interval: 10s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
-  pgadmin:
-    image: dpage/pgadmin4:8.9
-    restart: always
-    ports:
-      - "5052:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
-      - ./docker/pgadmin/pgpass:/pgadmin4/pgpass
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:80/misc/ping || exit -1
-      interval: 10s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
-    depends_on:
-      - postgres
-    entrypoint: /bin/sh -c "chmod 600 /pgadmin4/pgpass; /entrypoint.sh;"
   messenger:
     image: messenger:dev
     build: .
-    restart: always
+    restart: no
     ports:
       - "8083:8080"
-    depends_on:
-      - postgres
     environment:
-      - MSG_DB_URL=jdbc:postgresql://postgres/messenger_db
+      - MSG_DB_URL=jdbc:postgresql://msg_test-postgres-1/messenger_db_dev
+      - MONGO_DB_URL=mongodb://admin:password@localhost:27017/filedb?authSource=admin
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=filedb
+    volumes:
+      - mongo-data:/data/db
+  mongo-express:
+    image: mongo-express:latest
+    restart: "no"
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password@mongodb:27017/
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8081/status || exit -1
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 5
 volumes:
   postgres_data:
   pgadmin_data:
+  mongo-data:
+    driver: local

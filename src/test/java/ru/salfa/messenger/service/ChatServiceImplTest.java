@@ -9,13 +9,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import ru.salfa.messenger.dto.model.AttachmentsDto;
 import ru.salfa.messenger.dto.model.ChatIsCreated;
 import ru.salfa.messenger.dto.model.ChatsDto;
+import ru.salfa.messenger.dto.model.Document;
 import ru.salfa.messenger.dto.model.MessageDto;
-import ru.salfa.messenger.entity.Chat;
-import ru.salfa.messenger.entity.Messages;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.Chat;
+import ru.salfa.messenger.entity.postgres.Messages;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.exception.ChatNotFoundException;
 import ru.salfa.messenger.exception.MessageNotFoundException;
 import ru.salfa.messenger.exception.UserNotFoundException;
@@ -25,7 +25,6 @@ import ru.salfa.messenger.repository.ChatRepository;
 import ru.salfa.messenger.repository.MessageRepository;
 import ru.salfa.messenger.repository.UserRepository;
 import ru.salfa.messenger.service.impl.ChatServiceImpl;
-import ru.salfa.messenger.utils.mapper.AttachmentsMapper;
 import ru.salfa.messenger.utils.mapper.ChatMapper;
 import ru.salfa.messenger.utils.mapper.MessageMapper;
 
@@ -58,7 +57,6 @@ class ChatServiceImplTest {
     @Mock
     private MessageMapper messageMapper;
     @Mock
-    private AttachmentsMapper attachmentsMapper;
     @InjectMocks
     private ChatServiceImpl chatService;
 
@@ -261,11 +259,10 @@ class ChatServiceImplTest {
     void testCreateAndSaveMsg_Success() {
         //given
         String messageText = "Hello";
-        List<AttachmentsDto> attachments = List.of(new AttachmentsDto());
+        List<Document> attachments = List.of(new Document());
         MessageDto messageDto = new MessageDto();
         when(chatRepository.findById(defaultId)).thenReturn(Optional.of(chat));
         when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.of(user));
-        when(attachmentsMapper.toAttachmentsList(attachments)).thenReturn(List.of());
         when(messageMapper.toMessageDto(any(Messages.class))).thenReturn(messageDto);
 
         // when
@@ -280,7 +277,7 @@ class ChatServiceImplTest {
     void testCreateAndSaveMsg_ChatNotFound() {
         // given
         String messageText = "Hello";
-        List<AttachmentsDto> attachments = List.of(new AttachmentsDto());
+        List<Document> attachments = List.of(new Document());
         when(chatRepository.findById(defaultId)).thenReturn(Optional.empty());
 
         // when then
@@ -291,7 +288,7 @@ class ChatServiceImplTest {
     void testCreateAndSaveMsg_UserNotFound() {
         // given
         String messageText = "Hello";
-        List<AttachmentsDto> attachments = List.of(new AttachmentsDto());
+        List<Document> attachments = List.of(new Document());
         when(chatRepository.findById(defaultId)).thenReturn(Optional.of(chat));
         when(userRepository.findByPhoneAndIsDeleted(phone, false)).thenReturn(Optional.empty());
 

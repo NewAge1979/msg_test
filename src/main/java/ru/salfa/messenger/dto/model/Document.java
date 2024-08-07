@@ -5,13 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.net.URL;
-
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class AttachmentsDto {
+public class Document {
+    private String name;
     private String type;
-    private URL url;
+    private String data;
 }

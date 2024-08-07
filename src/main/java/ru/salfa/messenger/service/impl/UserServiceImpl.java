@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.salfa.messenger.dto.request.UserUpdateDataRequest;
 import ru.salfa.messenger.dto.response.UserGetDataResponse;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.exception.UserNotFoundException;
 import ru.salfa.messenger.repository.UserRepository;
 import ru.salfa.messenger.service.UserService;

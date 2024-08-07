@@ -1,4 +1,4 @@
-package ru.salfa.messenger.entity;
+package ru.salfa.messenger.entity.postgres;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,9 +12,9 @@ import org.hibernate.annotations.Immutable;
 @Setter
 @Entity
 @Immutable
-@Table(name = "new_user")
-public class NewUser {
+@Table(name = "blocked_user")
+public class BlockedUser {
     @Id
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "user_id")
+    private Long userId;
 }

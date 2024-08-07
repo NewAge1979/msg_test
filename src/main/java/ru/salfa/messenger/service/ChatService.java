@@ -19,7 +19,7 @@ public interface ChatService {
 
     boolean clearChat(Long chatId, String userPhone);
 
-    MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) throws JsonProcessingException;
+    MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<Document> attachments) throws JsonProcessingException;
 
     boolean deleteMessage(Long messageId, String userPhone, boolean isAll);
 

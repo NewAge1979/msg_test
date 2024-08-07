@@ -7,9 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.*;
-import ru.salfa.messenger.entity.Chat;
-import ru.salfa.messenger.entity.Messages;
-import ru.salfa.messenger.entity.User;
+import ru.salfa.messenger.entity.postgres.Attachments;
+import ru.salfa.messenger.entity.postgres.Chat;
+import ru.salfa.messenger.entity.postgres.Messages;
+import ru.salfa.messenger.entity.postgres.User;
 import ru.salfa.messenger.exception.ChatNotFoundException;
 import ru.salfa.messenger.exception.MessageNotFoundException;
 import ru.salfa.messenger.exception.UserNotFoundException;
@@ -19,12 +20,15 @@ import ru.salfa.messenger.repository.ChatRepository;
 import ru.salfa.messenger.repository.MessageRepository;
 import ru.salfa.messenger.repository.UserRepository;
 import ru.salfa.messenger.service.ChatService;
-import ru.salfa.messenger.utils.mapper.AttachmentsMapper;
+import ru.salfa.messenger.service.FileService;
 import ru.salfa.messenger.utils.mapper.ChatMapper;
 import ru.salfa.messenger.utils.mapper.MessageMapper;
 import ru.salfa.messenger.utils.mapper.UserMapper;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,8 +46,8 @@ public class ChatServiceImpl implements ChatService {
     private final ObjectMapper jsonMapper = getObjectMapper();
     private final ChatMapper chatMapper;
     private final MessageMapper messageMapper;
-    private final AttachmentsMapper attachmentsMapper;
     private final UserMapper userMapper;
+    private final FileService fileService;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,7 +85,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) {
+    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<Document> documents) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
 
@@ -91,12 +95,29 @@ public class ChatServiceImpl implements ChatService {
         msg.setChatId(chat);
         msg.setSenderId(sender);
 
-        if (attachments != null && !attachments.isEmpty()) {
-            var attachmentsList = attachmentsMapper.toAttachmentsList(attachments);
-            attachmentsRepository.saveAll(attachmentsList);
-            for (var att : attachmentsList) {
-                msg.addAttachments(att);
-            }
+        if (documents != null && !documents.isEmpty()) {
+            documents.forEach(document -> {
+                        MessageDigest digest;
+                        try {
+                            digest = MessageDigest.getInstance("SHA-256");
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new RuntimeException(e);
+                        }
+                        var data = Base64.getDecoder().decode(document.getData());
+
+                        byte[] hash = digest.digest(data);
+                        String hashString = Base64.getEncoder().encodeToString(hash);
+
+                        var url = fileService.save(hashString, data, document.getName());
+                        var attachment = new Attachments();
+                        attachment.setUrl(url);
+                        attachment.setFilename(document.getName());
+                        attachment.setType(document.getType());
+                        attachmentsRepository.save(attachment);
+                        msg.addAttachments(attachment);
+                    }
+            );
+
         }
 
         messageRepository.save(msg);
