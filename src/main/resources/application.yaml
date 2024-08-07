@@ -22,6 +22,11 @@ spring:
     mongodb:
       uri: ${MONGO_DB_URL:mongodb://admin:password@localhost:27017/filedb?authSource=admin}
 
+  rabbitmq:
+    host : rabbitmq
+    port : 5672
+    username : user
+    password : password
 #Logging
 logging:
   level:
@@ -54,3 +59,5 @@ sms:
 websocket:
   endpoint: /api/v1/ws/chat
   textMessageSizeLimit: 10
+
+

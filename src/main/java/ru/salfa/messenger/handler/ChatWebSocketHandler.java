@@ -6,12 +6,18 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.core.MessagePropertiesBuilder;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import ru.salfa.messenger.message.MessageOutUser;
+import ru.salfa.messenger.component.impl.WebSocketListenersHolder;
+import ru.salfa.messenger.config.RabbitConfig;
 import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
 import ru.salfa.messenger.service.ChatService;
@@ -19,9 +25,6 @@ import ru.salfa.messenger.service.ChatService;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static ru.salfa.messenger.utils.SimpleObjectMapper.getObjectMapper;
 
 
 @Component
@@ -32,6 +35,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> listeners = new ConcurrentHashMap<>();
     @Value("${websocket.textMessageSizeLimit}")
     private int textMessageSizeLimit;
+    private final RabbitTemplate rabbitTemplate;
+    private final WebSocketListenersHolder listeners;
 
     @Override
     @SneakyThrows
@@ -42,13 +47,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         var phone = (Objects.requireNonNull(session.getPrincipal())).getName();
         chatListPayload.setChats(chatService.getListChatDtoByUserPhone(phone));
         chatService.sendMessage(session, chatListPayload);
-        listeners.put(phone, session);
+        listeners.addListener(phone, session);
 
         log.info(String.format("New session connected! Connected listeners with phone %s : %s",
                 phone, listeners.size()));
     }
 
     @Override
+    @SneakyThrows
+    public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) {
+        var phoneNumber = (Objects.requireNonNull(session.getPrincipal())).getName();
+        MessageProperties messageProperties = MessagePropertiesBuilder.newInstance()
+                .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                .setHeader("userPhoneNumber", phoneNumber)
+                .build();
+        Message rabbitMessage = MessageBuilder.withBody(message.getPayload().getBytes())
+                .andProperties(messageProperties)
+                .build();
+
+        rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_NAME, rabbitMessage);
+
     public void handleTextMessage(@NonNull WebSocketSession session, @NotNull TextMessage message) throws IOException {
         try {
             var msg = getObjectMapper().readValue(message.getPayload(), MessageOutUser.class);

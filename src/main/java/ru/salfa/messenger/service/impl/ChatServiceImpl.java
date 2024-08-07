@@ -46,6 +46,7 @@ public class ChatServiceImpl implements ChatService {
     private final ObjectMapper jsonMapper = getObjectMapper();
     private final ChatMapper chatMapper;
     private final MessageMapper messageMapper;
+    private final AttachmentsMapper attachmentsMapper;
     private final UserMapper userMapper;
     private final FileService fileService;
 
@@ -85,7 +86,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<Document> documents) {
+    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<AttachmentsDto> attachments) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
 
