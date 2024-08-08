@@ -51,9 +51,7 @@ public class OtpServiceImpl implements OtpService {
         if (countOTPCodeError(user.getId()) >= otpConfig.getNumberOfAttempts()) {
             addLogAccessEvent(user, 2);
         }
-        if (!otpConfig.isSendSms() && otpCode.equals("0".repeat(otpConfig.getLength()))) {
-            flag = true;
-        }
+
         return flag;
     }
 

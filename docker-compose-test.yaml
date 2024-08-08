@@ -18,7 +18,7 @@ services:
       start_period: 10s
       retries: 5
   pgadmin:
-    image: dpage/pgadmin4:8.9
+    image: dpage/pgadmin4:8.10
     restart: always
     ports:
       - "5051:80"
@@ -89,4 +89,3 @@ volumes:
   pgadmin_data:
   mongo-data:
     driver: local
-
