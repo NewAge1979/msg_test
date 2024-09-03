@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,8 @@ public class JwtFilter extends OncePerRequestFilter {
     //private final String REFRESH_HEADER = "refresh-token";
     private final String AUTHORIZATION = "Authorization";
     private final String BEARER_PREFIX = "Bearer ";
+    @Value("${websocket.endpoint}")
+    private String endpointWS;
 
     private final JwtService jwtService;
     private final UserDetailServiceImpl userDetailService;
@@ -36,7 +39,9 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain
     ) throws IOException, ServletException {
-        var authorization = request.getHeader(AUTHORIZATION);
+        var authorization = request.getRequestURI().contains(endpointWS)
+                ? request.getParameter(AUTHORIZATION) : request.getHeader(AUTHORIZATION);
+
         log.debug("Authorization: {}", authorization);
         if (StringUtils.isNotEmpty(authorization) && StringUtils.startsWith(authorization, BEARER_PREFIX)) {
             String phone = null;
