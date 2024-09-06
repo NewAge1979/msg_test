@@ -58,5 +58,10 @@ sms:
 websocket:
   endpoint: /api/v1/ws/chat
   textMessageSizeLimit: 104857600
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # Путь для API-документации
+  swagger-ui:
+    url: /openapi.yaml # Путь к вашему файлу OpenAPI
 
 

@@ -33,7 +33,8 @@ public class WebSecurityConfig {
             "/api/v1/auth/signIn",
             "/swagger-ui/**",
             "/swagger-resource/*",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/openapi.yaml"
     };
 
     private final UserDetailsService userDetailsService;
