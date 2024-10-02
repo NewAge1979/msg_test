@@ -1,0 +1,318 @@
+openapi: 3.0.3
+info:
+  title: Messenger's API Documentation
+  version: '1.0.0'
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/v1/auth/getOTPCode:
+    post:
+      tags:
+        - Authentication service
+      description: Generating and sending a token.
+      operationId: getOTPCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetOTPCodeRequest'
+      responses:
+        '200':
+          description: Success generate and send OTP code.
+  /api/v1/auth/signIn:
+    post:
+      tags:
+        - Authentication service
+      description: Sign in method.
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+      responses:
+        '200':
+          description: Success sign in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignInSuccessResponse'
+        '400':
+          description: Bad credentials.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/auth/refreshTokens:
+    post:
+      tags:
+        - Authentication service
+      description: Tokens refresh method.
+      operationId: refreshTokens
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Refresh token
+      responses:
+        '200':
+          description: Success refresh tokens.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokensSuccessResponse'
+        '401':
+          description: Unauthorized request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/auth/signOut:
+    post:
+      tags:
+        - Authentication service
+      description: Sign out method.
+      operationId: signOut
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Access token
+      responses:
+        '200':
+          description: Success sign out.
+  /api/v1/user/getData:
+    get:
+      tags:
+        - User service
+      description: Get user data.
+      operationId: userGetData
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Access token
+        - in: query
+          name: phone
+          schema:
+            type: string
+            pattern: '^\d{10}$'
+          required: true
+          description: User phone.
+      responses:
+        '200':
+          description: Success getting user data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataResponse'
+        '403':
+          description: Unauthorized request.
+  /api/v1/user/updateData:
+    put:
+      tags:
+        - User service
+      description: Update user data.
+      operationId: userDataUpdate
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Access token
+        - in: query
+          name: phone
+          schema:
+            type: string
+            pattern: '^\d{10}$'
+          required: true
+          description: User phone.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDataUpdateRequest'
+      responses:
+        '200':
+          description: Success updating user data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataResponse'
+        '403':
+          description: Unauthorized request.
+  /api/v1/support/createTicket:
+    post:
+      tags:
+        - Support service
+      description: Creating a ticket for support.
+      operationId: createSupportTicket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTicketRequest'
+      responses:
+        '201':
+          description: Success creating ticket for support.
+        '400':
+          description: Bad Request
+
+components:
+  schemas:
+    GetOTPCodeRequest:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: Mobile phone number.
+          example: '9999999999'
+    SignInRequest:
+      type: object
+      required:
+        - phone
+        - otpCode
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: Mobile phone number.
+          example: '9999999999'
+        otpCode:
+          type: string
+          minLength: 5
+          maxLength: 5
+          description: OTP code.
+          example: '12345'
+    SignInSuccessResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token for access.
+        refreshToken:
+          type: string
+          description: Token for refresh.
+        isNewUser:
+          type: boolean
+          description: Is new user.
+    RefreshTokensSuccessResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token for access.
+        refreshToken:
+          type: string
+          description: Token for refresh.
+    ErrorResponse:
+      properties:
+        message:
+          type: string
+          description: Error message.
+    UserDataUpdateRequest:
+      type: object
+      required:
+        - firstName
+        - nickName
+      properties:
+        firstName:
+          type: string
+          pattern: '^[A-Za-zА-Яа-я\s]*$'
+          maxLength: 64
+          description: First name.
+          example: 'John'
+        lastName:
+          type: string
+          pattern: '^[A-Za-zА-Яа-я\s]*$'
+          maxLength: 64
+          nullable: true
+          description: Last name.
+          example: 'Doe'
+        nickName:
+          type: string
+          minLength: 5
+          maxLength: 32
+          description: Nickname.
+          example: 'John Doe'
+        aboutMe:
+          type: string
+          maxLength: 160
+          nullable: true
+          description: About me.
+          example: ''
+    UserDataResponse:
+      type: object
+      required:
+        - phone
+        - firstName
+        - nickName
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: Mobile phone number.
+          example: '9999999999'
+        firstName:
+          type: string
+          pattern: '^[A-Za-zА-Яа-я\s]*$'
+          maxLength: 64
+          description: First name.
+          example: 'John'
+        lastName:
+          type: string
+          pattern: '^[A-Za-zА-Яа-я\s]*$'
+          maxLength: 64
+          nullable: true
+          description: Last name.
+          example: 'Doe'
+        nickName:
+          type: string
+          minLength: 5
+          maxLength: 32
+          description: Nickname.
+          example: 'John Doe'
+        aboutMe:
+          type: string
+          maxLength: 160
+          nullable: true
+          description: About me.
+          example: ''
+    CreateTicketRequest:
+      type: object
+      required:
+        - phone
+        - email
+        - text
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: Mobile phone number.
+          example: '9999999999'
+        email:
+          type: string
+          #pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+          description: E-mail.
+          example: 'JohnDoe@yandex.ru'
+        text:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Ticket text.
+          example: 'Ticket text.'
