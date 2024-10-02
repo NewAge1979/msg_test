@@ -3,7 +3,7 @@ info:
   title: Messenger's API Documentation
   version: '1.0.0'
 servers:
-  - url: http://localhost:8080
+  - url: https://api.jv.test.messenger.akatosphere.ru
 
 paths:
   /api/v1/auth/getOTPCode:

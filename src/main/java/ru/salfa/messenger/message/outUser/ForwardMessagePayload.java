@@ -28,7 +28,7 @@ import java.util.Map;
 public class ForwardMessagePayload extends MessageOutUser {
     public static final String ACTION = "forward_message";
     @JsonIgnore
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yyyy");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @NotBlank(message = "Participant ID cannot be null")
     @Pattern(regexp = "^[1-9]\\d*$", message = "Field must be a number greater than 0")

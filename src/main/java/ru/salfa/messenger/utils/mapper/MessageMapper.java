@@ -13,6 +13,6 @@ import ru.salfa.messenger.utils.mapper.helper.AttachmentMapperDocument;
 public interface MessageMapper {
     @Mapping(source = "senderId.id", target = "sender")
     @Mapping(source = "attachments", target = "attachments", qualifiedByName = "attachmentsToDocument")
-    @Mapping(source = "created", target = "created", dateFormat = "HH:mm:ss dd.MM.yyyy")
+    @Mapping(source = "created", target = "created", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     MessageDto toMessageDto(Messages entity);
 }

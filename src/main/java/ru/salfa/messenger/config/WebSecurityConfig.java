@@ -31,9 +31,11 @@ public class WebSecurityConfig {
     private final static String[] WHITELIST = {
             "/api/v1/auth/getOTPCode",
             "/api/v1/auth/signIn",
+            "/api/v1/auth/refreshTokens",
             "/swagger-ui/**",
             "/swagger-resource/*",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/openapi.yaml"
     };
 
     private final UserDetailsService userDetailsService;

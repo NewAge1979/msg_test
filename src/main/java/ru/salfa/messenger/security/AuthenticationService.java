@@ -78,11 +78,23 @@ public class AuthenticationService {
         return new TokensResponse(jwtAccessToken, jwtRefreshToken);
     }
 
+    public TokensResponse refreshTokens(String refreshToken) {
+        var phone = jwtService.getPhoneFromRefreshToken(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(phone);
+        var jwtAccessToken = jwtService.createAccessToken(userDetails);
+        var jwtRefreshToken = jwtService.createRefreshToken(userDetails);
+        return new TokensResponse(jwtAccessToken, jwtRefreshToken);
+    }
+
     public void signOut(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
             jwtService.removeTokens(auth.getName());
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
+    }
+
+    public boolean validateRefreshToken(String refreshToken) {
+        return jwtService.refreshTokenExistsInCache(refreshToken) && jwtService.refreshTokenIsValid(refreshToken);
     }
 }
