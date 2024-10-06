@@ -184,6 +184,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public List<UserDto> getListUserDtoByPhone(String phone) {
+        return List.of(userMapper.toUserDto(userRepository.findByPhoneAndIsDeleted(phone, false)
+                .orElseThrow(()->new UserNotFoundException(String.format("User by phone number %s not found", phone)))));
+    }
+
+    @Override
     @Transactional
     public boolean blockedContact(Long userId, String phone) {
         var blockedUser = userRepository.findByIdAndIsDeleted(userId, false)

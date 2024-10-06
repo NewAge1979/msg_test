@@ -33,4 +33,6 @@ public interface ChatService {
 
     @Transactional
     boolean blockedContact(Long userId, String phone);
+
+    List<UserDto> getListUserDtoByPhone(String phone);
 }
