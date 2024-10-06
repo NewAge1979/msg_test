@@ -88,7 +88,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<Document> documents) throws JsonProcessingException {
+    public MessageDto createAndSaveMsg(Long chatId, String senderPhone, String message, List<Document> documents) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ChatNotFoundException("Chat not found"));
 
