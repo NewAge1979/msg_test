@@ -1,6 +1,5 @@
 package ru.salfa.messenger.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -83,7 +82,6 @@ public class ChatServiceImpl implements ChatService {
         msgList.forEach(msg -> msg.addUserDeleters(user));
         return true;
     }
-
 
 
     @Override
@@ -186,7 +184,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<UserDto> getListUserDtoByPhone(String phone) {
         return List.of(userMapper.toUserDto(userRepository.findByPhoneAndIsDeleted(phone, false)
-                .orElseThrow(()->new UserNotFoundException(String.format("User by phone number %s not found", phone)))));
+                .orElseThrow(() -> new UserNotFoundException(String.format("User by phone number %s not found", phone)))));
     }
 
     @Override
