@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.*;
+import ru.salfa.messenger.entity.enums.MessageType;
 import ru.salfa.messenger.entity.postgres.Attachments;
 import ru.salfa.messenger.entity.postgres.Chat;
 import ru.salfa.messenger.entity.postgres.Messages;
@@ -28,9 +29,9 @@ import ru.salfa.messenger.utils.mapper.UserMapper;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Locale;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -51,22 +52,36 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ChatsDto> getListChatDtoByUserPhone(String phone) {
+    public List<ChatsDto> getListChatDtoByUserPhone(String phone, Map<String, WebSocketSession> listeners) {
         return getChatsByParticipantPhone(phone).stream()
-                .map(chat -> mapChatToChatDto(chat, phone))
+                .map(chat -> mapChatToChatDto(chat, phone, listeners))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MessageDto> searchMessage(Long chatId, String query, String userPhone) {
-
+        var userId = userRepository.findByPhoneAndIsDeleted(userPhone, false).orElseThrow().getId();
         return messageRepository.findAll().stream()
                 .filter(msg -> msg.getChatId().getId().equals(chatId))
                 .filter(msg -> !msg.isDelete())
                 .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
                 .filter(msg -> msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
-                .map(messageMapper::toMessageDto)
+                .sorted(Comparator.comparing(Messages::getCreated).reversed())
+                .map(messages -> messageMapper.toMessageDto(messages, userId))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MessageDto> getMessageByChat(Long chatId, String userPhone) {
+        var userId = userRepository.findByPhoneAndIsDeleted(userPhone, false).orElseThrow().getId();
+        return messageRepository.findAll().stream()
+                .filter(msg -> msg.getChatId().getId().equals(chatId))
+                .filter(msg -> !msg.isDelete())
+                .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
+                .sorted(Comparator.comparing(Messages::getCreated).reversed())
+                .map(messages -> messageMapper.toMessageDto(messages, userId))
                 .toList();
     }
 
@@ -95,6 +110,7 @@ public class ChatServiceImpl implements ChatService {
         msg.setMessage(message);
         msg.setChatId(chat);
         msg.setSenderId(sender);
+        msg.setType(MessageType.TEXT);
 
         if (documents != null && !documents.isEmpty()) {
             documents.forEach(document -> {
@@ -122,7 +138,7 @@ public class ChatServiceImpl implements ChatService {
         }
 
         messageRepository.save(msg);
-        return messageMapper.toMessageDto(msg);
+        return messageMapper.toMessageDto(msg, sender.getId());
     }
 
     @Override
@@ -188,6 +204,20 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public void disconnectUser(String phoneNumber) {
+        var user = userRepository.findByPhoneAndIsDeleted(phoneNumber, false).orElseThrow();
+        user.setLastLogin(OffsetDateTime.now());
+        userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public void ackMessage(Long messageID) {
+        var message = messageRepository.findById(messageID).orElseThrow(() -> new MessageNotFoundException("Message not found"));
+        message.setIsRead(true);
+        messageRepository.saveAndFlush(message);
+    }
+
+    @Override
     @Transactional
     public boolean blockedContact(Long userId, String phone) {
         var blockedUser = userRepository.findByIdAndIsDeleted(userId, false)
@@ -237,15 +267,19 @@ public class ChatServiceImpl implements ChatService {
                 .toList();
     }
 
-    private ChatsDto mapChatToChatDto(Chat chat, String phone) {
+    private ChatsDto mapChatToChatDto(Chat chat, String phone, Map<String, WebSocketSession> listeners) {
         ChatsDto chatDto = chatMapper.toChatDto(chat);
-        List<MessageDto> messageDtos = messageRepository.findMessagesByChatId(chat).stream()
+
+        Long unreadMessageCount = messageRepository.findMessagesByChatId(chat).stream()
                 .filter(msg -> !msg.isDelete()
                         && !msg.getUserDeleteMessage().stream().map(User::getPhone)
                         .toList().contains(phone))
-                .map(messageMapper::toMessageDto)
-                .collect(Collectors.toList());
-        chatDto.setMessages(messageDtos);
+                .filter(messages -> !messages.getIsRead()).count();
+
+        var participant = chat.getParticipants().stream().filter(user -> !user.getPhone().equals(phone)).findFirst().orElseThrow();
+        chatDto.setAvatar(participant.getAvatar());
+        chatDto.setUnreadMessages(unreadMessageCount);
+        chatDto.setOnlineStatus(listeners.containsKey(participant.getPhone()) ? "online" : participant.getLastLogin().format(DateTimeFormatter.ISO_DATE));
         return chatDto;
     }
 }

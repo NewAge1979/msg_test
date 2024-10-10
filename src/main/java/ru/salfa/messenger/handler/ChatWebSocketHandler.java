@@ -20,6 +20,7 @@ import ru.salfa.messenger.component.impl.WebSocketListenersHolder;
 import ru.salfa.messenger.config.RabbitConfig;
 import ru.salfa.messenger.message.toUser.ChatListPayload;
 import ru.salfa.messenger.message.toUser.ExceptionPayload;
+import ru.salfa.messenger.repository.UserRepository;
 import ru.salfa.messenger.service.ChatService;
 
 import java.util.Objects;
@@ -30,6 +31,7 @@ import java.util.Objects;
 @Slf4j
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
+    private final UserRepository userRepository;
     private final RabbitTemplate rabbitTemplate;
     private final WebSocketListenersHolder listeners;
     @Value("${websocket.textMessageSizeLimit}")
@@ -42,12 +44,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         super.afterConnectionEstablished(session);
         var chatListPayload = new ChatListPayload();
         var phone = (Objects.requireNonNull(session.getPrincipal())).getName();
-        chatListPayload.setChats(chatService.getListChatDtoByUserPhone(phone));
+        chatListPayload.setChats(chatService.getListChatDtoByUserPhone(phone, listeners.getListeners()));
         chatService.sendMessage(session, chatListPayload);
         listeners.addListener(phone, session);
 
-        log.info(String.format("New session connected! Connected listeners with phone %s : %s",
-                phone, listeners.size()));
+        log.info("New session connected! Connected listeners with phone {} : count connections:s {}", phone, listeners.size());
     }
 
     @Override
@@ -68,8 +69,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
-        listeners.removeListener((Objects.requireNonNull(session.getPrincipal())).getName());
-        log.info(String.format("Session disconnected. Total connected listeners: %s", listeners.size()));
+        var phoneNumber = (Objects.requireNonNull(session.getPrincipal())).getName();
+        chatService.disconnectUser(phoneNumber);
+        listeners.removeListener(phoneNumber);
+        log.info("Session disconnected. Total connected listeners: {}", listeners.size());
     }
 
     @Override

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
+import ru.salfa.messenger.entity.enums.MessageType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,6 +33,9 @@ public class Messages {
     @ToString.Exclude
     private List<User> userDeleteMessage = new ArrayList<>();
     private boolean isDelete = false;
+    private Boolean isRead = false;
+    @Enumerated(EnumType.STRING)
+    private MessageType type;
     private LocalDateTime created = LocalDateTime.now();
     private LocalDateTime modified;
     @OneToMany(mappedBy = "message")

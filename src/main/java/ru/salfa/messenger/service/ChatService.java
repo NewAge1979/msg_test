@@ -9,14 +9,18 @@ import ru.salfa.messenger.message.MessageToUser;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface ChatService {
 
     @Transactional(readOnly = true)
-    List<ChatsDto> getListChatDtoByUserPhone(String phone);
+    List<ChatsDto> getListChatDtoByUserPhone(String phone, Map<String, WebSocketSession> listeners);
 
     @Transactional(readOnly = true)
     List<MessageDto> searchMessage(Long chatId, String query, String userPhone);
+
+    @Transactional(readOnly = true)
+    List<MessageDto> getMessageByChat(Long chatId, String userPhone);
 
     boolean clearChat(Long chatId, String userPhone);
 
@@ -35,4 +39,8 @@ public interface ChatService {
     boolean blockedContact(Long userId, String phone);
 
     List<UserDto> getListUserDtoByPhone(String phone);
+
+    void disconnectUser(String phoneNumber);
+
+    void ackMessage(Long messageID);
 }

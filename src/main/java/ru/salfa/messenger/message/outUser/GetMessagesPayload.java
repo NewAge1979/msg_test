@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.*;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.web.socket.WebSocketSession;
 import ru.salfa.messenger.dto.model.MessageResult;
 import ru.salfa.messenger.message.MessageOutUser;
@@ -14,17 +15,13 @@ import ru.salfa.messenger.service.ChatService;
 import java.util.Map;
 
 @Setter
-@JsonTypeName(SearchMessagesPayload.ACTION)
-public class SearchMessagesPayload extends MessageOutUser {
-    public static final String ACTION = "search_messages";
-
-
-    @JsonProperty("search_query")
-    private String searchQuery;
+@JsonTypeName(GetMessagesPayload.ACTION)
+public class GetMessagesPayload extends MessageOutUser {
+    public static final String ACTION = "get_messages";
 
     @NotBlank(message = "Chat ID cannot be null")
     @Pattern(regexp = "^[1-9]\\d*$", message = "Field must be a number greater than 0")
-    @JsonProperty("chat_id")
+    @JsonProperty("chatId")
     private String chatId;
 
     @Override
@@ -35,7 +32,7 @@ public class SearchMessagesPayload extends MessageOutUser {
     @Override
     @SneakyThrows
     public void handler(ChatService service, Map<String, WebSocketSession> listeners, String userPhone) {
-        var listMessageDto = service.searchMessage(Long.parseLong(chatId), searchQuery, userPhone);
+        var listMessageDto = service.getMessageByChat(Long.parseLong(chatId), userPhone);
 
         var searchResultPayload = new SearchMessagesResultsPayload();
         searchResultPayload.setMessagesList(MessageResult.ofListMessageDto(listMessageDto));

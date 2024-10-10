@@ -13,14 +13,18 @@ import java.util.List;
 public class ChatsDto {
     @JsonProperty("id")
     private Long id;
-    @JsonProperty("chat_name")
+    @JsonProperty("chatName")
     private String name;
     @JsonProperty("description")
     private String description;
     @JsonProperty("created")
     private String created;
-    @JsonProperty("participant_id")
+    @JsonProperty("avatar")
+    private String avatar;
+    @JsonProperty("onlineStatus")
+    private String onlineStatus;
+    @JsonProperty("unreadMessages")
+    private Long unreadMessages;
+    @JsonProperty("participantId")
     private List<Long> participantId;
-    @JsonProperty("messages")
-    private List<MessageDto> messages;
 }

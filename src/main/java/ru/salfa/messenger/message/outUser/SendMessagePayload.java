@@ -70,7 +70,6 @@ public class SendMessagePayload extends MessageOutUser {
 
                 }
             }
-
         }
 
         var successPayload = new SuccessActionPayload();

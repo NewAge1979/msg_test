@@ -52,6 +52,9 @@ public class User implements UserDetails {
     @Column(name = "nickname", nullable = false, length = 32)
     private String nickname;
 
+    @Column(name = "avatar", nullable = false, length = 32)
+    private String avatar;
+
     @Size(max = 64)
     @Column(name = "email", length = 64)
     private String email;
