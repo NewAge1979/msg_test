@@ -62,8 +62,7 @@ public class ChatServiceImpl implements ChatService {
     @Transactional(readOnly = true)
     public List<MessageDto> searchMessage(Long chatId, String query, String userPhone) {
         var userId = userRepository.findByPhoneAndIsDeleted(userPhone, false).orElseThrow().getId();
-        return messageRepository.findAll().stream()
-                .filter(msg -> msg.getChatId().getId().equals(chatId))
+        return messageRepository.findAllByChatId_Id(chatId).stream()
                 .filter(msg -> !msg.isDelete())
                 .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
                 .filter(msg -> msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
@@ -76,8 +75,7 @@ public class ChatServiceImpl implements ChatService {
     @Transactional(readOnly = true)
     public List<MessageDto> getMessageByChat(Long chatId, String userPhone) {
         var userId = userRepository.findByPhoneAndIsDeleted(userPhone, false).orElseThrow().getId();
-        return messageRepository.findAll().stream()
-                .filter(msg -> msg.getChatId().getId().equals(chatId))
+        return messageRepository.findAllByChatId_Id(chatId).stream()
                 .filter(msg -> !msg.isDelete())
                 .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
                 .sorted(Comparator.comparing(Messages::getCreated).reversed())
@@ -274,12 +272,27 @@ public class ChatServiceImpl implements ChatService {
                 .filter(msg -> !msg.isDelete()
                         && !msg.getUserDeleteMessage().stream().map(User::getPhone)
                         .toList().contains(phone))
-                .filter(messages -> !messages.getIsRead()).count();
+                .filter(messages -> {
+                    if(messages.getIsRead() == null){
+                        return true;
+                    } else {
+                        return !messages.getIsRead();
+                    }
+                }).count();
 
         var participant = chat.getParticipants().stream().filter(user -> !user.getPhone().equals(phone)).findFirst().orElseThrow();
         chatDto.setAvatar(participant.getAvatar());
         chatDto.setUnreadMessages(unreadMessageCount);
-        chatDto.setOnlineStatus(listeners.containsKey(participant.getPhone()) ? "online" : participant.getLastLogin().format(DateTimeFormatter.ISO_DATE));
+        if(listeners.containsKey(participant.getPhone())){
+            chatDto.setOnlineStatus("online");
+        } else {
+            if(participant.getLastLogin() == null){
+                chatDto.setOnlineStatus("offline");
+            } else {
+                chatDto.setOnlineStatus(participant.getLastLogin().format(DateTimeFormatter.ISO_DATE));
+            }
+        }
+
         return chatDto;
     }
 }
