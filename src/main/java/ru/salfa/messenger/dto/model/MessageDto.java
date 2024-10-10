@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.salfa.messenger.entity.enums.MessageType;
 
-import java.lang.management.MemoryType;
 import java.util.List;
 
 @Getter

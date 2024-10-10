@@ -31,7 +31,6 @@ import java.util.Objects;
 @Slf4j
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
-    private final UserRepository userRepository;
     private final RabbitTemplate rabbitTemplate;
     private final WebSocketListenersHolder listeners;
     @Value("${websocket.textMessageSizeLimit}")
