@@ -17,10 +17,10 @@ public interface ChatService {
     List<ChatsDto> getListChatDtoByUserPhone(String phone, Map<String, WebSocketSession> listeners);
 
     @Transactional(readOnly = true)
-    List<MessageDto> searchMessage(Long chatId, String query, String userPhone);
+    Map<String, List<MessageDto>> searchMessage(Long chatId, String query, String userPhone);
 
     @Transactional(readOnly = true)
-    List<MessageDto> getMessageByChat(Long chatId, String userPhone);
+    Map<String, List<MessageDto>> getMessageByChat(Long chatId, String userPhone);
 
     boolean clearChat(Long chatId, String userPhone);
 

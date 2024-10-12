@@ -25,6 +25,8 @@ public class ChatsDto {
     private String onlineStatus;
     @JsonProperty("unreadMessages")
     private Long unreadMessages;
+    @JsonProperty("lastMessage")
+    private MessageDto lastMessage;
     @JsonProperty("participantId")
     private List<Long> participantId;
 }
