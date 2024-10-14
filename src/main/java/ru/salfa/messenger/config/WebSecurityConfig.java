@@ -32,6 +32,7 @@ public class WebSecurityConfig {
             "/api/v1/auth/getOTPCode",
             "/api/v1/auth/signIn",
             "/api/v1/auth/refreshTokens",
+            "/api/v1/support/createTicket",
             "/swagger-ui/**",
             "/swagger-resource/*",
             "/v3/api-docs/**",
