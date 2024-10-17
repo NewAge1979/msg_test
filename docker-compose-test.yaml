@@ -62,7 +62,7 @@ services:
     ports:
       - "8082:8080"
     environment:
-      - JAVA_OPTS=-Xms512m -Xmx2g
+      - JAVA_OPTS=-Xms1g -Xmx2g
       - MSG_DB_URL=jdbc:postgresql://postgres/messenger_db
       - MONGO_DB_URL=mongodb://admin:password@mongodb/filedb?authSource=admin
       - SPRING_RABBITMQ_HOST=rabbitmq_msg_test

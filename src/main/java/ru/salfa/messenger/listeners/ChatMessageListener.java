@@ -63,6 +63,7 @@ public class ChatMessageListener implements ChannelAwareMessageListener {
             var exceptionPayload = new ExceptionPayload();
             exceptionPayload.setRequest(new String(messageBody, StandardCharsets.UTF_8));
             exceptionPayload.setException(e.getMessage());
+            log.error(e.getMessage());
 
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
             chatService.sendMessage(listeners.getListeners().get(userPhoneNumber), exceptionPayload);

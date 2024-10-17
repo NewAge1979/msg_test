@@ -63,9 +63,7 @@ public class ChatServiceImpl implements ChatService {
     @Transactional(readOnly = true)
     public Map<String, List<MessageDto>> searchMessage(Long chatId, String query, String userPhone) {
         var userId = userRepository.findByPhoneAndIsDeleted(userPhone, false).orElseThrow().getId();
-        return messageRepository.findAllByChatId_Id(chatId).stream()
-                .filter(msg -> !msg.isDelete())
-                .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
+        return messageRepository.findAllByChatIdWithFilter(chatId, userPhone).stream()
                 .filter(msg -> msg.getMessage().toLowerCase(Locale.ROOT).contains(query.toLowerCase()))
                 .map(messages -> messageMapper.toMessageDto(messages, userId))
                 .collect(Collectors.groupingBy(
@@ -80,9 +78,7 @@ public class ChatServiceImpl implements ChatService {
     @Transactional(readOnly = true)
     public Map<String, List<MessageDto>> getMessageByChat(Long chatId, String userPhone) {
         var userId = userRepository.findByPhoneAndIsDeleted(userPhone, false).orElseThrow().getId();
-        return messageRepository.findAllByChatId_Id(chatId).stream()
-                .filter(msg -> !msg.isDelete())
-                .filter(msg -> !msg.getUserDeleteMessage().stream().map(User::getPhone).toList().contains(userPhone))
+        return messageRepository.findAllByChatIdWithFilter(chatId, userPhone).stream()
                 .map(messages -> messageMapper.toMessageDto(messages, userId))
                 .collect(Collectors.groupingBy(
                         msg -> {
@@ -275,14 +271,16 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private ChatsDto mapChatToChatDto(Chat chat, String phone, Map<String, WebSocketSession> listeners) {
-        ChatsDto chatDto = chatMapper.toChatDto(chat);
+        var userId = chat.getParticipants().stream()
+                .filter(user -> user.getPhone().equals(phone)).map(User::getId).findFirst().orElseThrow();
+        ChatsDto chatDto = chatMapper.toChatDto(chat, userId);
         var messageByChat = messageRepository.findMessagesByChatId(chat);
         Long unreadMessageCount = messageByChat.stream()
                 .filter(msg -> !msg.isDelete()
                         && !msg.getUserDeleteMessage().stream().map(User::getPhone)
                         .toList().contains(phone))
                 .filter(messages -> {
-                    if(messages.getIsRead() == null){
+                    if (messages.getIsRead() == null) {
                         return true;
                     } else {
                         return !messages.getIsRead();
@@ -292,18 +290,16 @@ public class ChatServiceImpl implements ChatService {
         var participant = chat.getParticipants().stream()
                 .filter(user -> !user.getPhone().equals(phone)).findFirst().orElseThrow();
 
-        var userId = chat.getParticipants().stream()
-                .filter(user -> user.getPhone().equals(phone)).map(User::getId).findFirst().orElseThrow();
 
         chatDto.setAvatar(participant.getAvatar());
         chatDto.setUnreadMessages(unreadMessageCount);
         var lastMessage = messageByChat.stream().max(Comparator.comparing(Messages::getCreated)).orElseThrow();
 
         chatDto.setLastMessage(messageMapper.toMessageDto(lastMessage, userId));
-        if(listeners.containsKey(participant.getPhone())){
+        if (listeners.containsKey(participant.getPhone())) {
             chatDto.setOnlineStatus("online");
         } else {
-            if(participant.getLastLogin() == null){
+            if (participant.getLastLogin() == null) {
                 chatDto.setOnlineStatus("offline");
             } else {
                 chatDto.setOnlineStatus(participant.getLastLogin().format(DateTimeFormatter.ISO_DATE));
