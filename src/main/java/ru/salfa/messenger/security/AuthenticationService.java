@@ -65,6 +65,10 @@ public class AuthenticationService {
             var jwtAccessToken = jwtService.createAccessToken(userDetails);
             var jwtRefreshToken = jwtService.createRefreshToken(userDetails);
             boolean isNewUser = newUserRepository.existsById(user.getId());
+            if (isNewUser) {
+                user.setPhoneIsVerified(true);
+                userRepository.save(user);
+            }
             return new SignInResponse(jwtAccessToken, jwtRefreshToken, isNewUser);
         } catch (UsernameNotFoundException e) {
             throw new UserNotFoundException("User not found.");
