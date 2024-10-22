@@ -66,6 +66,7 @@ public class AuthenticationService {
             var jwtRefreshToken = jwtService.createRefreshToken(userDetails);
             boolean isNewUser = newUserRepository.existsById(user.getId());
             if (isNewUser) {
+                log.debug("isNewUser: {}", isNewUser);
                 user.setPhoneIsVerified(true);
                 userRepository.save(user);
             }
